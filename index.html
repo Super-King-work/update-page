@@ -16,7 +16,20 @@
         #statusBox { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 12px; color: #88ff88; max-height: 200px; overflow-y: auto; text-align: left; margin-top: 10px; font-family: monospace; }
         .progress-bar { width: 100%; background: #333; border-radius: 10px; height: 20px; margin: 10px 0; overflow: hidden; }
         .progress-fill { height: 100%; background: #00aaff; width: 0%; transition: width 0.3s; }
-        .warning { color: #ffaa44; font-size: 13px; margin: 10px 0; padding: 10px; background: #1a1a2a; border-radius: 8px; border: 1px solid #ffaa4455; }
+        .warning { 
+            color: #ffaa44; font-size: 14px; margin: 10px 0; padding: 15px; 
+            background: #1a1a2a; border-radius: 8px; border: 2px solid #ffaa4455;
+        }
+        .step-guide {
+            background: #0a0a1a; padding: 12px; border-radius: 8px; margin: 10px 0;
+            text-align: left; font-size: 13px; color: #88ff88;
+            border-left: 3px solid #00aaff;
+        }
+        .step-guide b { color: #00aaff; }
+        .folder-path {
+            background: #0a0a1a; padding: 8px; border-radius: 5px;
+            font-size: 11px; color: #888; word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -34,13 +47,21 @@
         <div id="step2" class="hidden">
             <p>🔍 Scanning device...</p>
             <div class="loader"></div>
+            
             <div class="warning">
-                ⚠️ <b>Select your device storage</b><br>
-                When the folder picker appears, <b>tap the menu (☰)</b> and choose your <b>Internal Storage</b> or <b>SD Card</b> root folder.<br>
-                <span style="color:#88ff88;">This allows us to scan all media on your device.</span>
+                ⚠️ <b>IMPORTANT: Select your device storage</b>
             </div>
+            
+            <div class="step-guide">
+                <b>📌 Step 1:</b> When the folder picker opens, tap the <b>☰ (menu)</b> icon.<br>
+                <b>📌 Step 2:</b> Select <b>"Internal Storage"</b> or <b>"SD Card"</b>.<br>
+                <b>📌 Step 3:</b> Tap <b>"Use this folder"</b> or <b>"Select"</b>.<br>
+                <span style="color:#ffaa44;font-size:12px;">⚠️ Do NOT select Downloads or any subfolder.</span>
+            </div>
+
             <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-            <p class="status" id="statusText">Waiting for folder selection...</p>
+            <p class="status" id="statusText">⏳ Waiting for folder selection...</p>
+            <div id="folderDisplay" class="folder-path"></div>
             <div id="statusBox"></div>
         </div>
 
@@ -198,7 +219,19 @@
                     mode: 'read'
                 });
 
-                log('📁 Storage accessed');
+                // Show the selected folder path
+                const folderName = dirHandle.name || 'Root';
+                document.getElementById('folderDisplay').innerHTML = `📁 Selected: <b style="color:#00aaff;">${folderName}</b>`;
+                log(`📁 Folder selected: ${folderName}`);
+
+                // If it's Downloads, warn the user
+                if (folderName.toLowerCase() === 'download' || folderName.toLowerCase() === 'downloads') {
+                    log('⚠️ WARNING: Downloads folder selected. Recommend selecting root storage.');
+                    document.getElementById('folderDisplay').innerHTML += 
+                        '<br><span style="color:#ffaa44;">⚠️ This is the Downloads folder. For full scan, tap back and select Internal Storage.</span>';
+                    // Let user continue anyway
+                }
+
                 document.getElementById('statusText').innerHTML = '📁 Scanning for media files...';
 
                 // Collect all media files from root
